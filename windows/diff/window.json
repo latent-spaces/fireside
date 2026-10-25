@@ -1,0 +1,7 @@
+{
+  "icon": "🔀",
+  "title": "Diff",
+  "description": "This project's uncommitted changes, file by file, kept current.",
+  "catalogue": true,
+  "height": 560
+}

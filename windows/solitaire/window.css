@@ -1,0 +1,35 @@
+/* The felt takes the skin's accent; the cards stay paper-white so they read on any skin. */
+.sol{display:flex;flex-direction:column;height:100%;background:color-mix(in srgb,var(--accent) 14%,var(--sunk))}
+.sol-bar{flex:none;display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:1.5px solid var(--line-soft)}
+.sol button{font:inherit;font-size:12px;padding:4px 11px;border-radius:9px;border:1.5px solid var(--line);
+  background:var(--surface);color:var(--ink);cursor:pointer}
+.sol button:hover:not(:disabled){border-color:var(--accent)}
+.sol button:disabled{opacity:.45;cursor:default}
+.sol-count{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.sol-board{position:relative;flex:1;min-height:0;overflow:hidden;user-select:none;-webkit-user-select:none}
+.sol-slot,.sol-card{position:absolute;width:var(--cw);height:var(--ch);border-radius:calc(var(--cw) * .09)}
+.sol-slot{border:1.5px dashed color-mix(in srgb,var(--ink-3) 60%,transparent);display:grid;place-items:center;
+  color:var(--ink-3);font-size:calc(var(--cw) * .36);opacity:.75;cursor:pointer}
+.sol-card{cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:box-shadow .12s ease,transform .12s ease}
+.sol-card.up{background:#fffdf8;border:1px solid rgba(0,0,0,.16);color:#2a2622}
+.sol-card.red{color:#c2382f}
+.sol-card.down{background-color:var(--accent);border:2px solid #fffdf8;
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.22) 0 3px,transparent 3px 8px)}
+.sol-card .c{position:absolute;top:5%;left:9%;display:flex;flex-direction:column;align-items:center;
+  font-family:var(--sans);font-weight:700;font-size:calc(var(--cw) * .24);line-height:1}
+.sol-card .c i{font-style:normal;font-size:.85em}
+.sol-card b{position:absolute;right:9%;bottom:5%;font-size:calc(var(--cw) * .46);line-height:1;font-weight:400}
+.sol-card.sel{box-shadow:0 0 0 2.5px var(--accent),0 5px 12px -3px rgba(0,0,0,.35);transform:translateY(-2px)}
+.sol-won{position:absolute;inset:0;display:grid;place-items:center;text-align:center;
+  background:color-mix(in srgb,var(--surface) 72%,transparent);backdrop-filter:blur(2px);
+  font-family:var(--round);font-size:18px;font-weight:600;color:var(--ink)}
+.sol-won button{margin-top:12px}
+.sol-won > div{animation:sol-pop .55s cubic-bezier(.16,1.4,.3,1)}
+.sol-trophy{font-size:44px;line-height:1;margin-bottom:6px;animation:sol-bob 1.6s ease-in-out .55s infinite}
+.sol-score{font-family:var(--sans);font-size:13px;font-weight:400;color:var(--ink-2);margin-top:2px}
+.sol{position:relative}
+.sol-fx{position:absolute;left:0;pointer-events:none;transition:opacity .6s ease}
+.sol-fx.fade{opacity:0}
+@keyframes sol-pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes sol-bob{50%{transform:translateY(-5px) rotate(-6deg)}}
+@media (prefers-reduced-motion:reduce){.sol-card{transition:none}.sol-won > div,.sol-trophy{animation:none}}

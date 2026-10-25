@@ -1,0 +1,6 @@
+.filelist{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:12px}
+.filelist li{display:flex;gap:9px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line-soft)}
+.filelist li:last-child{border-bottom:0}
+.filelist a{color:var(--ink);text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filelist a:hover{color:var(--accent)}
+.filelist .meta{color:var(--ink-3);font-size:10.5px;flex:none}

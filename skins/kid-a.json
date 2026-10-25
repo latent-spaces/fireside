@@ -1,0 +1,64 @@
+{
+  "id": "kid-a",
+  "name": "Kid A",
+  "note": "Radiohead \u2014 ice, fire and one red",
+  "inspiredBy": "Radiohead \u2014 Kid A",
+  "credit": "Artwork by Stanley Donwood & Thom Yorke, from the Kid A Mnesia Exhibition via Internet Archive",
+  "fontHref": "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap",
+  "assets": [
+    {
+      "id": "cover",
+      "url": "https://archive.org/download/radiohead-kid-a-mnesia-art/THIS_MIGHT_BE_A_COVER__BRAVE__txs_1421x1424.jpg",
+      "credit": "\u201cThis Might Be a Cover\u201d (Kid A)",
+      "source": "https://archive.org/details/radiohead-kid-a-mnesia-art"
+    },
+    {
+      "id": "blip",
+      "url": "https://archive.org/download/radiohead-kid-a-mnesia-art/Shynola_Blip_Mountains_00-00-34_txs_3346x1882.jpg",
+      "credit": "Mountains blip, Shynola",
+      "source": "https://archive.org/details/radiohead-kid-a-mnesia-art"
+    },
+    {
+      "id": "ice",
+      "url": "https://archive.org/download/radiohead-kid-a-mnesia-art/kid_a_painting_photo0005_txs_4674x3121.jpg",
+      "credit": "Kid A painting",
+      "source": "https://archive.org/details/radiohead-kid-a-mnesia-art"
+    },
+    {
+      "id": "alps",
+      "url": "https://archive.org/download/radiohead-kid-a-mnesia-art/alps_volcanoes_SNOWSTORM2_txs_1535x1535.jpg",
+      "credit": "Alps, volcanoes, snowstorm",
+      "source": "https://archive.org/details/radiohead-kid-a-mnesia-art"
+    }
+  ],
+  "wallpaper": "url('{{asset:cover}}') center 62% / cover no-repeat #0c0a0c",
+  "base": "dark",
+  "vars": {
+    "--ground": "#0c0a0c",
+    "--surface": "rgba(16,14,17,.84)",
+    "--sunk": "rgba(6,6,8,.55)",
+    "--ink": "#eef0e9",
+    "--ink-2": "#b6bdb9",
+    "--ink-3": "#9aabb3",
+    "--line": "#2c3b47",
+    "--line-soft": "#1e2830",
+    "--accent": "#e0281e",
+    "--mint": "#8fb3c9",
+    "--lilac": "#6d86a0",
+    "--sun": "#e8913a",
+    "--clay": "#c9412b",
+    "--sans": "\"IBM Plex Sans\", system-ui, sans-serif",
+    "--round": "\"IBM Plex Mono\", monospace",
+    "--mono": "\"IBM Plex Mono\", monospace",
+    "--tint-sat": "24%",
+    "--tint-lit": "17%",
+    "--shadow": "0 16px 38px -14px rgba(0,0,0,.9), 0 2px 6px -3px rgba(0,0,0,.7)",
+    "--shadow-hi": "0 28px 60px -16px rgba(0,0,0,.95), 0 3px 10px -4px rgba(0,0,0,.8)"
+  },
+  "tint": {
+    "from": 196,
+    "span": 30
+  },
+  "css": ".win{border-radius:3px}\n.win.focused{border-color:rgba(224,40,30,.6)}\n.win > .bar{height:32px;letter-spacing:.04em}\n.licon .tile{border-radius:4px}\n.composer,.dock,.pinned-strip .bub,.bub{border-radius:3px}\n.menubar{letter-spacing:.06em}\n.menubar,.composer,.dock{backdrop-filter:blur(18px) saturate(.9)}\n.ka-plate{position:absolute;inset:-4%;background-size:cover;background-repeat:no-repeat;opacity:0;\n  will-change:opacity,transform;animation:kaPlate 72s infinite both}\n.ka-plate.p1{opacity:1;background-position:center 62%}\n.ka-plate.p2{background-position:center 45%;animation-delay:18s}\n.ka-plate.p3{background-position:center 38%;animation-delay:36s}\n.ka-plate.p4{background-position:center 60%;animation-delay:54s}\n@keyframes kaPlate{0%{opacity:0;transform:scale(1.08) translate3d(1%,.6%,0);animation-timing-function:ease-in-out}\n  8%{opacity:1;animation-timing-function:linear}\n  25%{opacity:1;animation-timing-function:ease-in-out}\n  33%{opacity:0;transform:scale(1) translate3d(-1%,-.6%,0)}\n  100%{opacity:0;transform:scale(1) translate3d(-1%,-.6%,0)}}\n.ka-plate::after{content:'';position:absolute;inset:0;background:inherit;opacity:0;\n  animation:kaTear 11s steps(1) infinite}\n.ka-plate.p2::after{animation-duration:13s}.ka-plate.p3::after{animation-duration:9s}\n@keyframes kaTear{0%{opacity:0}\n  71%{opacity:1;clip-path:inset(38% 0 58% 0);transform:translateX(-46px);filter:saturate(2) hue-rotate(-12deg)}\n  72%{opacity:1;clip-path:inset(62% 0 31% 0);transform:translateX(30px);filter:saturate(2) hue-rotate(-12deg)}\n  73%{opacity:1;clip-path:inset(12% 0 85% 0);transform:translateX(-18px);filter:saturate(2) hue-rotate(-12deg)}\n  74%{opacity:0}\n  90%{opacity:1;clip-path:inset(78% 0 17% 0);transform:translateX(64px);filter:invert(1)}\n  91%{opacity:0}}\n.ka-veil{position:absolute;inset:0;\n  background:radial-gradient(ellipse at 50% 42%,rgba(8,6,8,0) 30%,rgba(8,6,8,.7) 100%),\n    linear-gradient(to bottom,rgba(8,6,8,.5),rgba(8,6,8,.18) 38%,rgba(8,6,8,.55))}\n.ka-grain{position:absolute;inset:-100px;opacity:.13;mix-blend-mode:screen;\n  animation:kaJitter .32s steps(3) infinite}\n@keyframes kaJitter{0%{transform:translate(0,0)}33%{transform:translate(-28px,14px)}\n  66%{transform:translate(18px,-22px)}100%{transform:translate(0,0)}}",
+  "scene": "<div class=\"ka-plate p1\" style=\"background-image:url('{{asset:cover}}')\"></div><div class=\"ka-plate p2\" style=\"background-image:url('{{asset:blip}}')\"></div><div class=\"ka-plate p3\" style=\"background-image:url('{{asset:ice}}')\"></div><div class=\"ka-plate p4\" style=\"background-image:url('{{asset:alps}}')\"></div><div class=\"ka-veil\"></div><div class=\"ka-grain\" style=\"background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E&quot;)\"></div>"
+}

@@ -1,0 +1,8 @@
+{
+  "icon": "💡",
+  "title": "Ideas",
+  "description": "Cards of options, each with a Review button.",
+  "ask": "Put an ideas window on the desk with options for: ",
+  "height": 560,
+  "fill": true
+}

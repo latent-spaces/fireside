@@ -1,0 +1,38 @@
+{
+  "id": "synthwave",
+  "name": "Synthwave",
+  "note": "Neon grid, hot pink and cyan",
+  "fontHref": "https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap",
+  "vars": {
+    "--ground": "#140B2B",
+    "--surface": "#1E1240",
+    "--sunk": "#170E34",
+    "--ink": "#FCE3FF",
+    "--ink-2": "#C09CE8",
+    "--ink-3": "#8B6FB8",
+    "--line": "#3A2270",
+    "--line-soft": "#2A1858",
+    "--accent": "#FF3D9A",
+    "--mint": "#34E7E4",
+    "--lilac": "#9D6BFF",
+    "--sun": "#FFD166",
+    "--clay": "#FF7A45",
+    "--wall-1": "#FF3D9A",
+    "--wall-2": "#34E7E4",
+    "--wall-3": "#9D6BFF",
+    "--wall-4": "#2B1B5A",
+    "--round": "\"Outfit\", sans-serif",
+    "--sans": "\"Outfit\", sans-serif",
+    "--shadow": "0 10px 30px -12px rgba(255,61,154,.5)",
+    "--shadow-hi": "0 0 0 1px rgba(255,61,154,.5), 0 16px 46px -12px rgba(52,231,228,.45)",
+    "--tint-sat": "48%",
+    "--tint-lit": "24%"
+  },
+  "css": ".win > .bar{background:linear-gradient(90deg, var(--tint), transparent)}.wall i{opacity:.55}\n.sy-sun{position:absolute;left:50%;bottom:38%;width:260px;height:260px;margin-left:-130px;\n  border-radius:50%;background:linear-gradient(#ffe14d,#ff3d9a 62%,#9d6bff);\n  -webkit-mask:repeating-linear-gradient(#000 0 12px,transparent 12px 17px);\n  mask:repeating-linear-gradient(#000 0 12px,transparent 12px 17px);\n  filter:drop-shadow(0 0 44px rgba(255,61,154,.6));animation:syRise 9s ease-in-out infinite}\n@keyframes syRise{0%,100%{bottom:36%}50%{bottom:40%}}\n.sy-horizon{position:absolute;left:0;right:0;bottom:38%;height:2px;background:#34e7e4;\n  box-shadow:0 0 22px 4px rgba(52,231,228,.75)}\n.sy-grid{position:absolute;left:-50%;right:-50%;bottom:0;height:38%;\n  background-image:repeating-linear-gradient(90deg,rgba(52,231,228,.55) 0 2px,transparent 2px 84px),\n    repeating-linear-gradient(rgba(255,61,154,.5) 0 2px,transparent 2px 62px);\n  transform:perspective(340px) rotateX(74deg);transform-origin:50% 100%;\n  animation:syRun 2.4s linear infinite}\n@keyframes syRun{to{background-position:0 62px, 0 62px}}\n.sy-scan{position:absolute;inset:0;background:repeating-linear-gradient(rgba(0,0,0,.22) 0 2px,transparent 2px 5px)}",
+  "scene": "<div class=\"sy-sun\"></div><div class=\"sy-horizon\"></div><div class=\"sy-grid\"></div><div class=\"sy-scan\"></div>",
+  "base": "dark",
+  "tint": {
+    "from": 286,
+    "span": 74
+  }
+}

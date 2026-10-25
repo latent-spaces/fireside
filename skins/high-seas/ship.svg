@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520">
+  <!-- mast -->
+  <rect x="252" y="40" width="14" height="330" fill="#6b4122"/>
+  <rect x="200" y="36" width="118" height="10" rx="5" fill="#6b4122"/>
+  <!-- pennant -->
+  <path d="M266 18h70l-10 16 10 16h-70z" fill="#c8242b"/>
+  <!-- main sail, patched -->
+  <path d="M150 70c70-14 150-14 218 0 10 80 10 160 0 230-68 12-148 12-218 0-10-70-10-150 0-230z" fill="#f7f1e1" stroke="#c9b98f" stroke-width="4"/>
+  <rect x="300" y="110" width="40" height="34" rx="3" fill="#eadfc4" stroke="#c9b98f" stroke-width="3" stroke-dasharray="6 4"/>
+  <path d="M190 190h140M200 240h120" stroke="#e2d6b6" stroke-width="4"/>
+  <!-- compass rose on the sail -->
+  <g transform="translate(240 170)" fill="#1b8fc4">
+    <path d="M0-52 10-10 52 0 10 10 0 52-10 10-52 0-10-10z"/>
+    <circle r="9" fill="#f7f1e1" stroke="#1b8fc4" stroke-width="4"/>
+  </g>
+  <!-- hull -->
+  <path d="M60 350h400l-40 110c-4 10-12 16-22 16H122c-10 0-18-6-22-16z" fill="#b8733a" stroke="#6b4122" stroke-width="5"/>
+  <path d="M70 380h380" stroke="#6b4122" stroke-width="4"/>
+  <path d="M84 420h352" stroke="#6b4122" stroke-width="4"/>
+  <g fill="#2a1a0e"><circle cx="150" cy="400" r="9"/><circle cx="230" cy="400" r="9"/><circle cx="310" cy="400" r="9"/><circle cx="390" cy="400" r="9"/></g>
+  <rect x="50" y="336" width="420" height="22" rx="6" fill="#7a4a24"/>
+  <!-- bowsprit and lantern -->
+  <path d="M460 350l54-40" stroke="#6b4122" stroke-width="10" stroke-linecap="round"/>
+  <path d="M80 336v-40" stroke="#6b4122" stroke-width="6"/>
+  <rect x="68" y="282" width="24" height="30" rx="5" fill="#f2c85b" stroke="#6b4122" stroke-width="4"/>
+</svg>

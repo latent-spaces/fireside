@@ -1,0 +1,11 @@
+{
+  "icon": "💫",
+  "title": "Activity",
+  "description": "A live feed of what the agent is doing.",
+  "catalogue": true,
+  "height": 250,
+  "fill": true,
+  "feeds": [
+    "activity"
+  ]
+}

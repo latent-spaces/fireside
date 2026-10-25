@@ -1,0 +1,10 @@
+{
+  "icon": "🪟",
+  "title": "Skins",
+  "description": "Switch the desk's look, including light and dark.",
+  "catalogue": true,
+  "height": 280,
+  "feeds": [
+    "theme"
+  ]
+}

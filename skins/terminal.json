@@ -1,0 +1,38 @@
+{
+  "id": "terminal",
+  "name": "Terminal",
+  "note": "Phosphor green on black",
+  "fontHref": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap",
+  "vars": {
+    "--ground": "#040705",
+    "--surface": "#09130B",
+    "--sunk": "#060F08",
+    "--ink": "#8BF08B",
+    "--ink-2": "#4FBF4F",
+    "--ink-3": "#2F8A34",
+    "--line": "#15381A",
+    "--line-soft": "#0E2612",
+    "--accent": "#39FF6A",
+    "--mint": "#39FF6A",
+    "--lilac": "#5CE1E6",
+    "--sun": "#D8F24E",
+    "--clay": "#FF5F5F",
+    "--wall-1": "#082C12",
+    "--wall-2": "#04160A",
+    "--wall-3": "#0A2418",
+    "--wall-4": "#031008",
+    "--sans": "\"JetBrains Mono\", monospace",
+    "--round": "\"JetBrains Mono\", monospace",
+    "--shadow": "0 0 0 1px rgba(57,255,106,.18)",
+    "--shadow-hi": "0 0 0 1px rgba(57,255,106,.4), 0 0 24px -6px rgba(57,255,106,.35)",
+    "--tint-sat": "45%",
+    "--tint-lit": "9%"
+  },
+  "css": ".win{border-radius:2px}.win > .bar{height:30px}.licon .tile{border-radius:2px}.composer,.dock,.bub,.act,.chip{border-radius:2px}.wall i{filter:blur(90px);opacity:.5}\n.tm-rain{position:absolute;inset:0}\n.tm-col{position:absolute;top:-120%;font-family:var(--mono);font-size:13px;line-height:1.35;\n  color:#39ff6a;text-shadow:0 0 8px rgba(57,255,106,.65);white-space:pre;animation:tmFall linear infinite}\n@keyframes tmFall{to{top:120%}}\n.tm-scan{position:absolute;inset:0;\n  background:repeating-linear-gradient(rgba(0,0,0,.28) 0 1px,transparent 1px 3px);\n  animation:tmFlicker 4s steps(2) infinite}\n@keyframes tmFlicker{0%,100%{opacity:.55}50%{opacity:.35}}",
+  "scene": "<div class=\"tm-rain\"><span class=\"tm-col\" style=\"left:0.0%;animation-duration:8.4s;animation-delay:-8.3s;opacity:0.23\">|<br>{<br>+<br>A<br>1<br><<br>X<br>%<br>><br>=<br>&<br>1<br>$<br>[<br>1<br><<br>-<br>-<br><<br>]<br><<br>%</span><span class=\"tm-col\" style=\"left:4.0%;animation-duration:11.5s;animation-delay:-1.8s;opacity:0.42\">]<br>A<br>A<br>&<br>1<br>&<br>&<br>+<br>1<br>]<br>1<br>%<br>Y<br>{<br>\\<br>-<br>{<br>%<br>><br>&<br>\\<br>%</span><span class=\"tm-col\" style=\"left:8.0%;animation-duration:7.0s;animation-delay:-1.8s;opacity:0.51\">A<br>[<br>=<br>><br>%<br>C<br><<br>&<br>1<br>@<br>[<br>#<br>B<br>%<br>-<br>E<br>|<br>*<br>&<br>*<br>=<br>\\</span><span class=\"tm-col\" style=\"left:12.0%;animation-duration:12.7s;animation-delay:-0.8s;opacity:0.41\"><<br>&<br>\\<br>$<br>#<br>Z<br>|<br>D<br>*<br>\\<br>@<br><<br>><br>$<br>-<br>}<br>E<br>|<br>{<br>#<br>-<br>1</span><span class=\"tm-col\" style=\"left:16.0%;animation-duration:10.6s;animation-delay:-6.5s;opacity:0.60\">F<br>Z<br>X<br>|<br>|<br>C<br>=<br>@<br>#<br>&<br>F<br>*<br><<br>X<br><<br>/<br>#<br>C<br>B<br><<br>1<br>D</span><span class=\"tm-col\" style=\"left:20.0%;animation-duration:8.2s;animation-delay:-9.2s;opacity:0.39\">X<br>*<br>\\<br>C<br>+<br>Z<br>B<br>=<br>0<br>*<br>=<br>}<br>@<br>><br>#<br>1<br>[<br>E<br>\\<br>{<br>D<br>]</span><span class=\"tm-col\" style=\"left:24.0%;animation-duration:6.2s;animation-delay:-6.6s;opacity:0.19\">}<br>*<br>+<br>%<br>/<br>Z<br>{<br>X<br>-<br>Y<br>%<br>/<br>C<br>-<br>=<br>B<br>Z<br>+<br>]<br>{<br><<br>}</span><span class=\"tm-col\" style=\"left:28.0%;animation-duration:8.7s;animation-delay:-8.7s;opacity:0.58\">X<br>&<br>}<br>/<br>\\<br>0<br>{<br>-<br>%<br>=<br>@<br>&<br>|<br>{<br>C<br>Y<br>$<br>@<br>A<br>B<br>D<br>1</span><span class=\"tm-col\" style=\"left:32.0%;animation-duration:5.0s;animation-delay:-1.5s;opacity:0.22\">B<br>F<br>%<br>+<br>+<br>+<br>+<br>><br>#<br>A<br>+<br>1<br>[<br><<br>[<br>*<br>}<br>><br>|<br>@<br>1<br>></span><span class=\"tm-col\" style=\"left:36.0%;animation-duration:7.5s;animation-delay:-1.4s;opacity:0.49\">=<br>@<br>0<br><<br>Y<br>[<br>@<br>+<br>{<br>A<br>/<br>=<br>@<br>=<br>#<br>><br>><br>Y<br>#<br>*<br>#<br>#</span><span class=\"tm-col\" style=\"left:40.0%;animation-duration:11.8s;animation-delay:-5.2s;opacity:0.56\">D<br>/<br>#<br>X<br>C<br>}<br>$<br>0<br>[<br>$<br>=<br>{<br>C<br>%<br>0<br>E<br>$<br>\\<br>A<br>Y<br><<br>C</span><span class=\"tm-col\" style=\"left:44.0%;animation-duration:6.8s;animation-delay:-5.2s;opacity:0.33\">=<br>E<br>]<br>%<br>%<br>E<br>$<br>|<br>A<br>]<br>@<br>F<br>F<br>E<br>Y<br>[<br>F<br>]<br>X<br>+<br>D<br>F</span><span class=\"tm-col\" style=\"left:48.0%;animation-duration:6.6s;animation-delay:-6.2s;opacity:0.56\">0<br>0<br>F<br>/<br>#<br>/<br>[<br>C<br>@<br>=<br>*<br>F<br>D<br>=<br>=<br><<br>]<br>><br>]<br>#<br>[<br>|</span><span class=\"tm-col\" style=\"left:52.0%;animation-duration:7.7s;animation-delay:-8.0s;opacity:0.59\">X<br>0<br>#<br>A<br>=<br>F<br>A<br><<br>X<br>B<br>><br>+<br>F<br>C<br>E<br>[<br>#<br>Z<br>}<br>-<br>F<br>A</span><span class=\"tm-col\" style=\"left:56.0%;animation-duration:12.5s;animation-delay:-1.6s;opacity:0.41\">+<br>*<br>+<br>D<br><<br>D<br>}<br>}<br>{<br>0<br>{<br>&<br>Z<br>*<br>F<br>A<br>{<br>@<br>X<br>@<br>#<br>B</span><span class=\"tm-col\" style=\"left:60.0%;animation-duration:9.7s;animation-delay:-2.6s;opacity:0.36\">0<br>0<br>F<br>D<br>A<br>><br>$<br>D<br>{<br>-<br>Y<br>[<br>X<br>Y<br>[<br>0<br>/<br>[<br>\\<br>$<br>]<br>E</span><span class=\"tm-col\" style=\"left:64.0%;animation-duration:8.5s;animation-delay:-1.8s;opacity:0.18\">{<br>1<br>D<br>=<br>Z<br>*<br>B<br>&<br>X<br>Z<br>$<br>-<br>X<br>Z<br>$<br>{<br>%<br>{<br>$<br>$<br>0<br>Y</span><span class=\"tm-col\" style=\"left:68.0%;animation-duration:7.0s;animation-delay:-2.8s;opacity:0.50\">F<br>{<br>}<br>{<br>#<br>@<br>D<br>><br>%<br>1<br>|<br>B<br>$<br>$<br>%<br>#<br>F<br>E<br>><br>Z<br>%<br>1</span><span class=\"tm-col\" style=\"left:72.0%;animation-duration:12.5s;animation-delay:-7.0s;opacity:0.55\">$<br>*<br>%<br>0<br>E<br>Z<br><<br>*<br>|<br>@<br>$<br>@<br>$<br>[<br>C<br>/<br>*<br>$<br>%<br>F<br>#<br>$</span><span class=\"tm-col\" style=\"left:76.0%;animation-duration:12.2s;animation-delay:-1.5s;opacity:0.48\">/<br>%<br>Z<br>[<br>X<br>*<br>{<br>-<br>><br>+<br>*<br>|<br><<br>B<br>]<br>-<br><<br>[<br>B<br>\\<br>F<br>></span><span class=\"tm-col\" style=\"left:80.0%;animation-duration:7.7s;animation-delay:-2.0s;opacity:0.31\">B<br>=<br>{<br>/<br>Z<br>{<br>*<br>]<br>D<br>><br>+<br>Z<br>#<br>}<br>B<br>X<br>]<br>}<br>C<br>-<br>$<br>+</span><span class=\"tm-col\" style=\"left:84.0%;animation-duration:7.1s;animation-delay:-0.4s;opacity:0.51\">D<br>=<br>0<br>|<br>%<br>*<br>*<br>C<br>0<br>+<br>|<br>$<br>@<br>\\<br>$<br><<br>><br>F<br>]<br>Z<br>><br><</span><span class=\"tm-col\" style=\"left:88.0%;animation-duration:6.5s;animation-delay:-9.0s;opacity:0.29\">/<br>E<br>{<br>X<br>-<br>Y<br>B<br>X<br>/<br>+<br>{<br>%<br>$<br>&<br>#<br>C<br>|<br><<br>/<br>1<br>F<br>C</span><span class=\"tm-col\" style=\"left:92.0%;animation-duration:9.2s;animation-delay:-2.4s;opacity:0.23\">0<br>A<br><<br>F<br>/<br><<br>@<br>Y<br>]<br><<br>/<br>Y<br>><br>*<br>0<br>|<br>%<br>-<br>/<br>@<br>{<br>1</span><span class=\"tm-col\" style=\"left:96.0%;animation-duration:5.1s;animation-delay:-7.3s;opacity:0.41\">}<br>/<br>1<br>}<br>[<br>\\<br>A<br>\\<br>$<br>E<br>[<br>\\<br>*<br>$<br>B<br>}<br>/<br>=<br>F<br>0<br>/<br>1</span><span class=\"tm-col\" style=\"left:100.0%;animation-duration:6.6s;animation-delay:-8.8s;opacity:0.49\">[<br>$<br>#<br>]<br>*<br>><br>B<br>X<br>A<br>-<br>B<br>#<br>%<br>X<br>Z<br>+<br>$<br>\\<br>C<br>[<br>]<br>|</span></div><div class=\"tm-scan\"></div>",
+  "base": "dark",
+  "tint": {
+    "from": 118,
+    "span": 26
+  }
+}

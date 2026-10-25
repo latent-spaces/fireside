@@ -1,0 +1,11 @@
+{
+  "icon": "🪙",
+  "title": "Usage",
+  "description": "Claude and Codex plan limits.",
+  "catalogue": true,
+  "width": 350,
+  "height": 375,
+  "feeds": [
+    "subscriptions"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "icon": "🖼️",
+  "title": "Gallery",
+  "description": "Pictures or clips: one large, two side by side, more in rows.",
+  "ask": "Put a gallery on the desk with these images: ",
+  "height": 360,
+  "fill": true
+}

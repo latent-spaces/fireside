@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Drawn on the macOS icon grid: the same margin as app icons, so they sit at one size in the bar. -->
+  <g transform="translate(12.5 12.5) scale(.8047)">
+  <rect width="128" height="128" rx="28" fill="#f4f1ea"/>
+  <!-- open book -->
+  <path d="M16 38c16-6 32-6 48 4v62c-16-10-32-10-48-4z" fill="#fff" stroke="#3a3a3a" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M112 38c-16-6-32-6-48 4v62c16-10 32-10 48-4z" fill="#fff" stroke="#3a3a3a" stroke-width="4" stroke-linejoin="round"/>
+  <g stroke="#9a9a9a" stroke-width="3" stroke-linecap="round">
+    <path d="M24 52c10-3 22-3 32 2M24 64c10-3 22-3 32 2M24 76c10-3 22-3 32 2"/>
+  </g>
+  <!-- die on the right page -->
+  <g transform="translate(86 72) rotate(-12)">
+    <rect x="-24" y="-24" width="48" height="48" rx="10" fill="#c8242b" stroke="#7a1418" stroke-width="3"/>
+    <g fill="#fff">
+      <circle cx="-11" cy="-11" r="5"/><circle cx="0" cy="0" r="5"/><circle cx="11" cy="11" r="5"/>
+      <circle cx="11" cy="-11" r="5"/><circle cx="-11" cy="11" r="5"/>
+    </g>
+  </g>
+  </g>
+</svg>

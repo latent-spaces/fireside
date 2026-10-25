@@ -1,0 +1,28 @@
+{
+  "name": "fireside",
+  "version": "0.1.0",
+  "description": "A desktop in your browser for Claude Code, Codex, and any agent that speaks ACP.",
+  "type": "module",
+  "bin": {
+    "fireside": "./bin/fireside.mjs"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@agentclientprotocol/claude-agent-acp": "0.94.0",
+    "@agentclientprotocol/codex-acp": "2.2.2",
+    "@agentclientprotocol/sdk": "1.4.0",
+    "fflate": "0.8.3",
+    "vite": "8.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "typescript": "7.0.2"
+  },
+  "scripts": {
+    "check": "tsc --noEmit"
+  }
+}

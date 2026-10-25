@@ -1,0 +1,9 @@
+{
+  "icon": "\ud83e\udded",
+  "title": "Browser",
+  "description": "A small framed browser with an address bar.",
+  "catalogue": true,
+  "height": 520,
+  "fill": true,
+  "multiple": true
+}

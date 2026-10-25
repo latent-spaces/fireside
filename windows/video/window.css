@@ -1,0 +1,15 @@
+.vid{display:flex;flex-direction:column;height:100%;min-height:0}
+.vid .vstage{position:relative;flex:1;min-height:0;background:#000}
+.vid .vstage video,.vid .vstage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain}
+.vid .vnote{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  padding:24px;text-align:center;background:var(--surface);color:var(--ink-2);font:13px/1.45 var(--sans)}
+.vid > .vnote{position:static;flex:1}
+.vid .vnote b{color:var(--ink);font-size:14px}
+.vid .vlist{flex:none;max-height:34%;overflow:auto;padding:4px;border-top:1px solid var(--line-soft);background:var(--sunk)}
+.vid .vrow{display:flex;gap:8px;align-items:baseline;width:100%;padding:5px 8px;border:0;border-radius:8px;background:transparent;
+  color:var(--ink-2);font:13px/1.35 var(--sans);text-align:left;cursor:pointer}
+.vid .vrow:hover{background:var(--surface);color:var(--ink)}
+.vid .vrow.on{background:var(--surface);color:var(--ink);font-weight:600}
+.vid .vnum{flex:none;width:18px;font-family:var(--mono);font-size:10px;color:var(--ink-3);text-align:right}
+.vid .vrow.on .vnum{color:var(--accent)}
+.vid .vname{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

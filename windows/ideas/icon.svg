@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Drawn on the macOS icon grid: the same margin as app icons, so they sit at one size in the bar. -->
+  <g transform="translate(12.5 12.5) scale(.8047)">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD98A"/><stop offset="1" stop-color="#F7A93B"/></linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFFBEA"/><stop offset="1" stop-color="#FFFBEA" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#bg)"/>
+  <circle cx="64" cy="54" r="44" fill="url(#glow)" opacity=".8"/>
+  <!-- little rays -->
+  <g stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9">
+    <path d="M64 12v8M28 26l6 6M100 26l-6 6M18 56h8M110 56h-8"/>
+  </g>
+  <!-- the bulb, with the desk's face -->
+  <path d="M64 28a26 26 0 0 0-15 47c3 2.4 5 5.6 5 9v3h20v-3c0-3.4 2-6.6 5-9a26 26 0 0 0-15-47z" fill="#FFFCF7"/>
+  <rect x="53" y="90" width="22" height="7" rx="3.5" fill="#A096A6"/>
+  <rect x="56" y="99" width="16" height="7" rx="3.5" fill="#8A7F92"/>
+  <rect x="55" y="50" width="5" height="7" rx="2.5" fill="#3C3340"/>
+  <rect x="68" y="50" width="5" height="7" rx="2.5" fill="#3C3340"/>
+  <path d="M58 65q6 5 12 0" stroke="#3C3340" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="51" cy="62" r="3.5" fill="#F2789F" opacity=".5"/><circle cx="77" cy="62" r="3.5" fill="#F2789F" opacity=".5"/>
+  </g>
+</svg>

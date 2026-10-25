@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fireside</title>
+<link rel="icon" href="/fireside.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/app.css">
+<!-- The last skin's light/dark and ground, so the loading screen opens in the desk's own colours. -->
+<script>try{const b=JSON.parse(localStorage.getItem('fireside:boot')||'null'),r=document.documentElement;if(b?.theme)r.dataset.theme=b.theme;if(b?.ground)r.style.setProperty('--boot-ground',b.ground)}catch{}</script>
+
+</head>
+<body>
+  <div class="wall" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="scene" id="scene" aria-hidden="true"></div>
+
+  <header class="menubar">
+    <!-- The loading screen's little window, small: it blinks now and then. -->
+    <svg class="logo" viewBox="0 0 56 56" aria-hidden="true"><linearGradient id="logoEmber" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB25C"/><stop offset="1" stop-color="#E0703E"/></linearGradient><rect width="56" height="56" rx="17" fill="url(#logoEmber)"/><clipPath id="logoWin"><rect x="12" y="15" width="32" height="28" rx="5"/></clipPath><g clip-path="url(#logoWin)"><rect x="12" y="15" width="32" height="28" fill="#FFF6EC"/><rect x="12" y="15" width="32" height="8" fill="#FFE1BE"/></g><rect class="eye" x="20.5" y="30.5" width="4" height="5" rx="2" fill="#3C3340"/><rect class="eye" x="31.5" y="30.5" width="4" height="5" rx="2" fill="#3C3340"/><ellipse cx="18" cy="38" rx="2.6" ry="1.5" fill="#F7A27A" opacity=".7"/><ellipse cx="38" cy="38" rx="2.6" ry="1.5" fill="#F7A27A" opacity=".7"/></svg>
+    <span class="proj">Fireside</span>
+    <button class="deskbtn" id="deskBtn" type="button" title="Switch workspace" aria-haspopup="true" aria-expanded="false"><span class="deskbtn-name" id="deskBtnName">…</span><span class="deskbtn-caret" aria-hidden="true">▾</span></button>
+    <span class="status" id="status"><i class="dot"></i><span>connecting</span></span>
+    <!-- Shortcuts, then the ＋ that asks for another one. -->
+    <div class="launchbar" id="launchbar">
+      <div class="launch" id="icons"></div>
+      <button class="mb" id="iconsMore" type="button" title="More shortcuts" aria-label="More shortcuts" aria-haspopup="true" aria-expanded="false" hidden>⋯</button>
+      <button class="add add-shortcut" id="shortcutBtn" type="button" title="Add a shortcut" aria-label="Add a shortcut" aria-haspopup="true" aria-expanded="false">＋</button>
+    </div>
+    <button class="mb stale" id="staleBtn" title="Component refresh paused — click to retry" hidden>⟳ retry refresh</button>
+    <button class="mb mb-update" id="updateBtn" type="button" aria-haspopup="true" aria-expanded="false" hidden>↑ Update agents</button>
+    <button class="mb" id="tidyBtn" title="Tidy the desktop">✧ tidy</button>
+    <span class="clock" id="clock"></span>
+  </header>
+
+  <main class="desk" id="desk">
+    <p class="deskEmpty" id="deskEmpty" hidden>
+      <b>Nothing open.</b>
+      Ask for anything below — windows appear as work happens.
+    </p>
+  </main>
+
+  <footer class="tray">
+    <div id="stateError" class="composer-note" role="alert" hidden></div>
+    <div id="notices" class="tray-slot"></div>
+    <div id="trayComponents" class="tray-slot"></div>
+    <div class="dockrow">
+      <div class="dock" id="dock"></div>
+      <button class="add" id="addBtn" type="button" title="Add a window" aria-label="Add a window" aria-haspopup="true" aria-expanded="false">＋</button>
+    </div>
+  </footer>
+
+  <div class="catalogue" id="catalogue" role="dialog" aria-label="Add a window" hidden></div>
+  <div class="desks" id="desks" role="dialog" aria-label="Workspaces" hidden></div>
+  <div class="desks shortcut-menu" id="shortcutMenu" role="dialog" aria-label="Add a shortcut" hidden></div>
+  <div class="desks" id="iconMenu" role="dialog" aria-label="More shortcuts" hidden></div>
+  <div class="updates" id="updates" role="dialog" aria-label="Update agents" hidden></div>
+  <div class="desks share-dialog" id="shareDialog" role="dialog" aria-label="Share" hidden></div>
+
+  <!-- Covers the desk until its first state is drawn; app.js lifts it. -->
+  <div class="boot" id="boot" role="status" aria-label="Loading the desk">
+    <div class="boot-hop"><span class="boot-tile"><i><b></b><b></b></i></span></div>
+    <span class="boot-shadow"></span>
+    <span class="boot-word">fireside</span>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

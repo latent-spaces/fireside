@@ -1,0 +1,41 @@
+{
+  "id": "vangogh",
+  "name": "Starry Night",
+  "note": "Cobalt, cypress and chrome yellow",
+  "inspiredBy": "Vincent van Gogh, 1889",
+  "credit": "Public domain, via Wikimedia Commons",
+  "assets": [
+    {
+      "id": "bg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+      "credit": "The Starry Night, Vincent van Gogh (public domain)",
+      "source": "https://commons.wikimedia.org/wiki/File:Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg"
+    }
+  ],
+  "wallpaper": "url('{{asset:bg}}')",
+  "vars": {
+    "--ground": "#0a1330",
+    "--surface": "rgba(16,30,63,.94)",
+    "--sunk": "#0d1a3a",
+    "--ink": "#f3ead2",
+    "--ink-2": "#b9c6e6",
+    "--ink-3": "#8492bc",
+    "--line": "#33497e",
+    "--line-soft": "#223357",
+    "--accent": "#f4c542",
+    "--mint": "#79c6c0",
+    "--lilac": "#9fb4ef",
+    "--sun": "#ffd970",
+    "--clay": "#e08a3c",
+    "--tint-sat": "34%",
+    "--tint-lit": "27%",
+    "--shadow": "0 14px 34px -14px rgba(2,6,20,.85), 0 2px 6px -3px rgba(2,6,20,.7)",
+    "--shadow-hi": "0 26px 56px -16px rgba(2,6,20,.92), 0 3px 10px -4px rgba(2,6,20,.75)"
+  },
+  "base": "dark",
+  "css": ".win{backdrop-filter:blur(9px) saturate(1.1);border-width:1px}\n.win.focused{border-color:rgba(244,197,66,.55)}\n.menubar,.composer,.dock{backdrop-filter:blur(18px) saturate(1.15)}\n.wall{filter:saturate(1.05)}",
+  "tint": {
+    "from": 206,
+    "span": 46
+  }
+}

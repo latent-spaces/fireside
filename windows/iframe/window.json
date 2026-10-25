@@ -1,0 +1,8 @@
+{
+  "icon": "🌐",
+  "title": "Live preview",
+  "description": "A running page, framed on the desk.",
+  "ask": "Put a preview window on the desk showing: ",
+  "height": 380,
+  "fill": true
+}

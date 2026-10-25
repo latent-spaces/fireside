@@ -1,0 +1,11 @@
+{
+  "icon": "✨",
+  "title": "Anything you describe",
+  "description": "A sandboxed HTML window — a game, a tool, a toy.",
+  "ask": "Put an HTML window on the desk that does this: ",
+  "height": 260,
+  "feeds": [
+    "theme"
+  ],
+  "fill": true
+}

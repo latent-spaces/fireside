@@ -1,0 +1,17 @@
+.choices{height:100%;display:grid;grid-auto-rows:minmax(58px,1fr);gap:8px;overflow:auto}
+.choice{display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px;text-align:left;color:var(--ink);font:inherit;cursor:pointer;
+  background:var(--sunk);border:1.5px solid transparent;border-radius:12px;transition:border-color .14s,transform .14s}
+.choice:hover:not(:disabled){border-color:var(--accent)}
+.choice:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.choice-words{flex:1;min-width:0}
+.choice-words b,.choice-words small{display:block}
+.choice-words b{font-family:var(--round);font-weight:600;font-size:14.5px;line-height:1.25}
+.choice-words small{margin-top:3px;font-size:12.5px;line-height:1.35;color:var(--ink-2)}
+.choice-go{flex:none;width:8px;height:8px;margin-right:3px;border:solid var(--ink-3);border-width:2px 2px 0 0;transform:rotate(45deg);transition:transform .16s,border-color .16s}
+.choice:hover:not(:disabled) .choice-go{border-color:var(--accent);transform:translateX(3px) rotate(45deg)}
+.choice.primary{background:var(--accent);color:#fff}
+.choice.primary small{color:inherit;opacity:.85}
+.choice.primary .choice-go{border-color:currentColor}
+:root[data-theme=dark] .choice.primary{color:#2B1B24}
+.choice:disabled{opacity:.55;cursor:not-allowed}
+@media (prefers-reduced-motion:reduce){.choice,.choice-go{transition:none}}

@@ -1,0 +1,11 @@
+{
+  "icon": "📜",
+  "title": "Log",
+  "description": "A file tailed live as it grows.",
+  "ask": "Put a log window on the desk following this file: ",
+  "height": 250,
+  "fill": true,
+  "feeds": [
+    "lines"
+  ]
+}

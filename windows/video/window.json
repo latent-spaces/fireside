@@ -1,0 +1,8 @@
+{
+  "icon": "🎬",
+  "title": "Video",
+  "description": "A player for one video or a playlist.",
+  "ask": "Put a video player on the desk playing: ",
+  "height": 400,
+  "fill": true
+}

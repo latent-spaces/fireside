@@ -1,0 +1,10 @@
+{
+  "icon": "🌱",
+  "title": "Repository",
+  "description": "Branch, staged and unstaged changes in this project.",
+  "catalogue": true,
+  "height": 280,
+  "feeds": [
+    "git"
+  ]
+}

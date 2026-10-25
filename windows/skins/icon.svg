@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Drawn on the macOS icon grid: the same margin as app icons, so they sit at one size in the bar. -->
+  <g transform="translate(12.5 12.5) scale(.8047)"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C3ADF5"/><stop offset="1" stop-color="#9A7BE2"/></linearGradient></defs><rect width="128" height="128" rx="30" fill="url(#bg)"/>
+  <path d="M64 20C98 20 114 42 112 62C110 80 96 82 88 78C80 74 72 82 76 92C80 104 70 110 58 108C32 104 14 86 14 62C14 38 34 20 64 20Z" fill="#FFFCF7"/>
+  <circle cx="38" cy="78" r="7" fill="#A88BE6"/>
+  <circle cx="40" cy="50" r="10" fill="#F2789F"/>
+  <circle cx="64" cy="38" r="10" fill="#FFC861"/>
+  <circle cx="88" cy="46" r="10" fill="#63CBA5"/>
+  <circle cx="96" cy="66" r="8" fill="#2B2551"/>
+  <circle cx="58" cy="90" r="9" fill="#E0703E"/>
+  </g>
+</svg>

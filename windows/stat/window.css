@@ -1,0 +1,4 @@
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:11px}
+.stat .v{font-family:var(--round);font-size:25px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.stat .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.stat .d{font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}

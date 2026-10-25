@@ -1,0 +1,9 @@
+node_modules/
+.fireside/
+.DS_Store
+.playwright-mcp/
+design/
+.fireside-install-*/
+.impeccable/
+PRODUCT.md
+brag*

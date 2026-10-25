@@ -1,0 +1,8 @@
+{
+  "icon": "📝",
+  "title": "Notepad",
+  "description": "Jot small tasks and send them to the agent when ready.",
+  "catalogue": true,
+  "height": 440,
+  "fill": true
+}

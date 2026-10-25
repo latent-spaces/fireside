@@ -1,0 +1,38 @@
+{
+  "id": "high-seas",
+  "name": "High Seas",
+  "note": "A ship under sail on a blue noon sea, under a flapping pirate flag",
+  "credit": "Original artwork drawn for Fireside.",
+  "fontHref": "https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800&display=swap",
+  "assets": [
+    { "id": "sea", "file": "grand-line.svg", "credit": "Open sea at noon" },
+    { "id": "ship", "file": "ship.svg", "credit": "A ship with a compass-rose sail" },
+    { "id": "roger", "file": "jolly-roger.svg", "credit": "Skull and crossbones" }
+  ],
+  "wallpaper": "url('{{asset:sea}}') center / cover no-repeat #2f8fd8",
+  "base": "light",
+  "vars": {
+    "--ground": "#F6ECD2",
+    "--surface": "rgba(255,250,236,.96)",
+    "--sunk": "#EFE0BC",
+    "--ink": "#2A1A0E",
+    "--ink-2": "#6A4526",
+    "--ink-3": "#94704A",
+    "--line": "#B7894F",
+    "--line-soft": "#E3CFA4",
+    "--accent": "#C8242B",
+    "--mint": "#1B8FC4",
+    "--lilac": "#7A4FB0",
+    "--sun": "#F2C85B",
+    "--clay": "#D2692C",
+    "--round": "\"Bangers\", \"Nunito\", sans-serif",
+    "--sans": "\"Nunito\", system-ui, sans-serif",
+    "--shadow": "0 6px 0 -3px rgba(42,26,14,.35), 0 10px 24px -10px rgba(10,74,120,.55)",
+    "--shadow-hi": "0 9px 0 -4px rgba(42,26,14,.4), 0 18px 36px -12px rgba(10,74,120,.65)",
+    "--tint-sat": "58%",
+    "--tint-lit": "80%"
+  },
+  "tint": { "from": 355, "span": 60 },
+  "css": ".win{border-width:2px;border-color:#8a5a2c}\n.win.focused{border-color:#2a1a0e}\n.win > .bar .title{letter-spacing:.04em}\n.licon .tile{border-radius:9px}\n.menubar,.composer,.dock{backdrop-filter:blur(10px) saturate(1.1)}\n.hs-sea{position:absolute;inset:0;background:url('{{asset:sea}}') center / cover no-repeat}\n.hs-ship{position:absolute;left:8%;bottom:9%;width:min(30vw,420px);aspect-ratio:1;\n  background:url('{{asset:ship}}') center / contain no-repeat;transform-origin:50% 90%;\n  animation:hsSail 60s linear infinite, hsBob 5s ease-in-out infinite}\n@keyframes hsSail{0%{left:-30%}100%{left:105%}}\n@keyframes hsBob{0%,100%{transform:rotate(-2.5deg) translateY(0)}50%{transform:rotate(2.5deg) translateY(10px)}}\n.hs-wave{position:absolute;left:-10%;right:-10%;height:12%;\n  background:radial-gradient(60px 18px at 60px 0,transparent 97%,var(--c) 100%) 0 0 / 120px 100% repeat-x;\n  animation:hsWave var(--t) linear infinite}\n.hs-wave.w1{--c:rgba(27,143,196,.55);--t:9s;bottom:6%}\n.hs-wave.w2{--c:rgba(15,111,166,.75);--t:6s;bottom:0;animation-direction:reverse}\n@keyframes hsWave{to{background-position:120px 0}}\n.hs-flag{position:absolute;right:3%;top:10%;width:120px;aspect-ratio:3/2;background:#15110e url('{{asset:roger}}') center / 70% no-repeat;\n  border-radius:2px 8px 8px 2px;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);transform-origin:0 50%;animation:hsFlap 3s ease-in-out infinite;opacity:.92}\n@keyframes hsFlap{0%,100%{transform:skewY(-3deg) scaleX(1)}50%{transform:skewY(3deg) scaleX(.94)}}\n@media (prefers-reduced-motion:reduce){.hs-ship,.hs-wave,.hs-flag{animation:none}.hs-ship{left:8%}}",
+  "scene": "<div class=\"hs-sea\"></div><div class=\"hs-flag\"></div><div class=\"hs-ship\"></div><div class=\"hs-wave w1\"></div><div class=\"hs-wave w2\"></div>"
+}

@@ -1,0 +1,68 @@
+.diffw{display:flex;flex-direction:column;gap:10px;min-width:0}
+.diffw .dhead{display:flex;flex-direction:column;gap:6px}
+.diffw .dtitle{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.diffw .dtitle b{font-family:var(--round);font-size:15px;font-weight:600;color:var(--ink)}
+.diffw .dsum{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.diffw .dpos{color:color-mix(in srgb,var(--mint) 70%,var(--ink))}
+.diffw .dneg{color:color-mix(in srgb,var(--clay) 80%,var(--ink))}
+.diffw .dnote{margin:0;color:var(--ink-2);font-size:13px}
+.diffw .dtools{display:flex;gap:6px}
+.diffw .dfilter{flex:1;min-width:0;font:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--line);
+  border-radius:7px;background:var(--surface);color:var(--ink)}
+.diffw .dbtn{font:inherit;font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:7px;
+  background:var(--sunk);color:var(--ink-2);cursor:pointer}
+.diffw .dbtn:hover{color:var(--ink)}
+.diffw .dfiles{display:flex;flex-direction:column;gap:8px}
+.diffw .dfile{border:1px solid var(--line);border-radius:9px;background:var(--surface);overflow:hidden}
+.diffw .dfile>summary{display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;list-style:none;
+  background:var(--sunk);font-family:var(--mono);font-size:12px;position:sticky;top:0;z-index:1}
+.diffw .dfile>summary::-webkit-details-marker{display:none}
+.diffw .dfile>summary::before{content:'▸';color:var(--ink-3);font-size:10px;transition:transform .15s}
+.diffw .dfile[open]>summary::before{transform:rotate(90deg)}
+.diffw .dfile[open]>summary{border-bottom:1px solid var(--line)}
+.diffw .dpath{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.diffw .dpath .dir{color:var(--ink-3)}
+.diffw .dpath .nm{color:var(--ink);font-weight:600}
+.diffw .dstat:empty{display:none}
+.diffw .dstat{flex:none;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:1px 7px;
+  background:color-mix(in srgb,var(--lilac) 30%,transparent);color:var(--ink-2)}
+.diffw .dfile.new .dstat{background:color-mix(in srgb,var(--mint) 34%,transparent)}
+.diffw .dfile.deleted .dstat{background:color-mix(in srgb,var(--clay) 30%,transparent)}
+.diffw .dn{flex:none;display:flex;align-items:center;gap:6px;font-size:11.5px}
+.diffw .dblocks{display:inline-flex;gap:1.5px}
+.diffw .dblocks i{width:7px;height:7px;border-radius:1.5px;background:var(--line)}
+.diffw .dblocks i.p{background:var(--mint)}
+.diffw .dblocks i.n{background:var(--clay)}
+.diffw .dcode{font-family:var(--mono);font-size:11.5px;line-height:1.55;overflow-x:auto}
+.diffw .dhunk{padding:3px 10px;color:var(--ink-3);background:color-mix(in srgb,var(--accent) 7%,transparent);
+  font-size:11px;white-space:pre;border-top:1px solid var(--line-soft)}
+.diffw .dhunk .dat{margin-right:10px;color:var(--ink-2)}
+.diffw .dhunk:first-child{border-top:0}
+.diffw .dl{display:grid;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;font:inherit;grid-template-columns:3.4em 3.4em 1.4em 1fr;min-width:max-content}
+.diffw .dl .no{padding:0 6px;text-align:right;color:var(--ink-3);user-select:none;opacity:.8}
+.diffw .dl .mk{text-align:center;user-select:none;color:var(--ink-3)}
+.diffw .dl .tx{white-space:pre;padding-right:12px;color:var(--ink)}
+.diffw .dl.ins{background:color-mix(in srgb,var(--mint) 18%,transparent)}
+.diffw .dl.ins .no,.diffw .dl.ins .mk{background:color-mix(in srgb,var(--mint) 14%,transparent)}
+.diffw .dl.rm{background:color-mix(in srgb,var(--clay) 16%,transparent)}
+.diffw .dl.rm .no,.diffw .dl.rm .mk{background:color-mix(in srgb,var(--clay) 12%,transparent)}
+.diffw .dl.note .tx{color:var(--ink-3);font-style:italic}
+.diffw .dempty{margin:0;padding:8px 10px;color:var(--ink-3);font-family:var(--mono);font-size:11.5px}
+.diffw .dfile .acts{padding:6px 10px;border-top:1px solid var(--line-soft)}
+.diffw .dl .tx mark,.diffw .dside .tx mark{color:inherit;border-radius:3px;padding:0 1px}
+.diffw .ins .tx mark{background:color-mix(in srgb,var(--mint) 55%,transparent)}
+.diffw .rm .tx mark{background:color-mix(in srgb,var(--clay) 45%,transparent)}
+.diffw [data-i] .no{cursor:pointer}
+.diffw [data-i] .no:hover{color:var(--ink)}
+.diffw [data-i].sel{box-shadow:inset 3px 0 var(--accent)}
+.diffw [data-i].sel .no{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--ink)}
+.diffw .dcode.split{overflow-x:hidden}
+.diffw .drow{display:grid;grid-template-columns:1fr 1fr}
+.diffw .dside{display:grid;grid-template-columns:3.4em 1fr;min-width:0}
+.diffw .dside+.dside{border-left:1px solid var(--line-soft)}
+.diffw .dside .no{padding:0 6px;text-align:right;color:var(--ink-3);user-select:none;opacity:.8}
+.diffw .dside .tx{white-space:pre-wrap;overflow-wrap:anywhere;padding:0 10px 0 6px;color:var(--ink)}
+.diffw .dside.ins{background:color-mix(in srgb,var(--mint) 18%,transparent)}
+.diffw .dside.rm{background:color-mix(in srgb,var(--clay) 16%,transparent)}
+.diffw .dside.gap{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.diffw .dside.note .tx{color:var(--ink-3);font-style:italic}
