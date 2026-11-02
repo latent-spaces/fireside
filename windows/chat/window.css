@@ -189,10 +189,15 @@
 .chat-tabs{flex:none;display:flex;align-items:center;gap:4px;padding:6px 8px;
   border-bottom:1px solid var(--line);background:var(--sunk)}
 /* Only the tabs scroll, so the + beside them is always within reach. The row
-   pans by dragging it too: a desk window is often too narrow to flick. */
-.chat-tab-list{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:4px;
-  overflow-x:auto;scrollbar-width:none;touch-action:pan-x;overscroll-behavior-x:contain}
+   pans by dragging it too: a desk window is often too narrow to flick. The
+   scroll padding keeps the active tab off the edge, so its neighbour shows. */
+.chat-tab-list{--fade-left:0px;--fade-right:0px;flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:4px;
+  overflow-x:auto;scrollbar-width:none;touch-action:pan-x;overscroll-behavior-x:contain;scroll-padding-inline:56px;
+  mask-image:linear-gradient(to right,transparent,#000 var(--fade-left),#000 calc(100% - var(--fade-right)),transparent)}
 .chat-tab-list::-webkit-scrollbar{display:none}
+/* data-more-* set by markTabEdges in window.js. */
+.chat-tab-list[data-more-left]{--fade-left:28px}
+.chat-tab-list[data-more-right]{--fade-right:28px}
 .chat-tab-list.dragging{cursor:grabbing;user-select:none}
 .chat-tab-list.dragging .chat-tab{cursor:grabbing}
 .chat-tab{display:flex;align-items:center;flex:none;border-radius:9px;background:transparent}

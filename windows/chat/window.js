@@ -276,7 +276,15 @@ function createChat(ctx) {
       strip.append(addTabButton());
       // With several chats open the strip scrolls; the one you are in stays in sight.
       list.querySelector('.chat-tab.on')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      markTabEdges(list);
     });
+  }
+
+  /** Each end of the row fades while there are tabs past it. */
+  function markTabEdges(rail) {
+    const rest = rail.scrollWidth - rail.clientWidth - rail.scrollLeft;
+    rail.toggleAttribute('data-more-left', rail.scrollLeft > 1);
+    rail.toggleAttribute('data-more-right', rest > 1);
   }
 
   /** Tab rails use the same gesture lifecycle as windows and desktop icons. */
@@ -299,6 +307,10 @@ function createChat(ctx) {
       if (!e.deltaY || Math.abs(e.deltaX) > Math.abs(e.deltaY) || rail.scrollWidth <= rail.clientWidth) return;
       e.preventDefault(); rail.scrollLeft += e.deltaY;
     }, { passive: false });
+    rail.addEventListener('scroll', () => markTabEdges(rail), { passive: true });
+    const resize = new ResizeObserver(() => markTabEdges(rail));
+    resize.observe(rail);
+    onDispose(() => resize.disconnect());
   }
 
   function tabButton(t, view) {
