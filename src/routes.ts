@@ -12,7 +12,7 @@ import { homedir } from 'node:os';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { PKG_ROOT, firesideDir } from './paths.ts';
+import { PKG_ROOT, SHARED, firesideDir } from './paths.ts';
 import { windowFolder, listSkins, bundledURL } from './catalog.ts';
 import { readState, mutate, upsertPanel, savePanelData } from './state.mjs';
 import * as updates from './updates.mjs';
@@ -32,11 +32,6 @@ function windowCommand(root: string, id: string, name: string, cmd: string[]) {
   run.catch(() => {}).finally(() => { if (chain.tail === run) commandChains.delete(id); });
   return run;
 }
-
-// The parts of .fireside a page may read: panel files, fetched skin art, app icons.
-// Folders inside .fireside that windows may show: panel files, skin and icon images,
-// `fireside shot` pictures, and media the CLI copied in from outside the project.
-const SHARED = ['panels', 'skins/assets', 'icons', 'shots', 'media'];
 
 export function createRoutes(context: RouteContext) {
   const { ROOT, TOKEN, url, snapshot, clients, layout, record, deskList, busyChat, tabs, pushAcp, pushState, subscriptions, follows, refreshState, appendBuffer, findSkin, cachedAsset, cacheAsset, appAssets, getState, windowList, revision, skinRevision, codeId } = context;

@@ -34,6 +34,9 @@ export function imageFile(root, name) {
   return typeof name === 'string' && NAME.test(name) ? path.join(dir(root), name) : null;
 }
 
+/** Tells the agent where a message's images are saved, since a block carries only their bytes. */
+export const imageNote = (names) => ({ type: 'text', text: `\n\n<fireside-images>\nSaved in the project, ready for a gallery: ${names.map(name => `.fireside/images/${name}`).join(', ')}\n</fireside-images>` });
+
 /** A saved image as an ACP content block. */
 export function imageBlock(root, name) {
   const file = imageFile(root, name);

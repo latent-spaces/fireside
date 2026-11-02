@@ -123,7 +123,7 @@ HTML runs in a sandbox with scripts enabled. It inherits theme variables when
 rendered. Buttons with `data-prompt` prepare text in the parent composer through
 a constrained message bridge. They do not send automatically. File links and
 media resolve against the project; project-file serving answers byte ranges, checks real paths and
-blocks private Fireside descriptors. Inside `.fireside/` only `panels/`, `skins/assets/`, `icons/`, `shots/` and `media/` are served. Files outside the project are not served: `fireside panel` copies a gallery or video file from elsewhere into `.fireside/media/` and points the panel there, and it reports a file that does not exist. A query such as `?v=2` is kept on file links.
+blocks private Fireside descriptors. Inside `.fireside/` only `panels/`, `skins/assets/`, `icons/`, `shots/`, `media/` and `images/` (pictures pasted into a chat) are served. Files outside the project are not served: `fireside panel` copies a gallery or video file from elsewhere into `.fireside/media/` and points the panel there, and it reports a file that does not exist or sits in a private part of `.fireside/`. A query such as `?v=2` is kept on file links.
 
 Logs retain 500 lines in the server and browser, capped at 16,000 characters per line. Reads are bounded, preserve
 partial UTF-8 lines, and reset on file rotation. Chat seeds from the last 2 MB,

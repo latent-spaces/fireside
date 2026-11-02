@@ -22,6 +22,11 @@ export function firesideDir(dir: string) {
   return path.join(projectDir(dir), '.fireside');
 }
 
+/** Folders inside .fireside that windows may show: panel files, skin and icon images,
+ *  `fireside shot` pictures, media the CLI copied in from outside the project, and
+ *  images pasted into a chat. */
+export const SHARED = ['panels', 'skins/assets', 'icons', 'shots', 'media', 'images'];
+
 export function statePath(dir: string) {
   return path.join(firesideDir(dir), 'state.json');
 }

@@ -9,7 +9,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { projectDir, ensureDirs, readServer, serverPath, panelsDir, firesideDir } from './paths.ts';
+import { projectDir, ensureDirs, readServer, serverPath, panelsDir, firesideDir, SHARED } from './paths.ts';
 import { readState, mutate, upsertPanel, savePanelData } from './state.mjs';
 import { listWindows, listSkins, KIND } from './catalog.ts';
 import { stop as stopDesk } from './desks.mjs';
@@ -50,7 +50,8 @@ const asJSON = (v) => { try { return JSON.parse(resolveValue(v)); } catch (error
 /** A picture or video a window will show, as a path the desk can serve. The desk
  *  serves only the project, so a file from elsewhere (a screenshot in /tmp, a
  *  download) is copied into .fireside/media; one inside it given whole is made
- *  relative. A file that isn't there is reported now rather than left to break. */
+ *  relative. A file that isn't there, or that sits in a private part of .fireside,
+ *  is reported now rather than left to break. */
 function mediaPath(src) {
   if (typeof src !== 'string' || /^(https?:|data:|blob:)/.test(src)) return src;
   const [, file, tail] = /^([^?#]*)(.*)$/s.exec(src);
@@ -60,7 +61,11 @@ function mediaPath(src) {
     return src;
   }
   const fromTop = path.relative(ROOT, full);
-  if (!fromTop.startsWith('..') && !path.isAbsolute(fromTop)) return fromTop.split(path.sep).join('/') + tail;
+  if (!fromTop.startsWith('..') && !path.isAbsolute(fromTop)) {
+    const own = path.relative(firesideDir(ROOT), full);
+    if (!own.startsWith('..') && !SHARED.some((shared) => own.startsWith(path.join(shared) + path.sep))) console.error(`fireside: ${fromTop} is in a private folder and won't show. Windows can show ${SHARED.map((shared) => `.fireside/${shared}`).join(', ')} and the rest of the project.`);
+    return fromTop.split(path.sep).join('/') + tail;
+  }
   const dir = path.join(firesideDir(ROOT), 'media');
   fs.mkdirSync(dir, { recursive: true });
   const bytes = fs.readFileSync(full);

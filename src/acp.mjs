@@ -7,7 +7,7 @@ import { PKG_ROOT } from './paths.ts';
 import { installing } from './updates.mjs';
 import * as agents from './agents.mjs';
 import { fail } from './errors.ts';
-import { saveImage, imageBlock } from './chat-images.mjs';
+import { saveImage, imageBlock, imageNote } from './chat-images.mjs';
 import { agentEvent, errorSignal, activeTurns, startTurn, endTurn } from './agent-diagnostics.mjs';
 
 /** Statuses mid-operation: a chat in one is busy, and another operation must wait. */
@@ -27,7 +27,7 @@ A sentence you write just before a tool call can reach the user reworded and wit
 const AUTH_REQUIRED = -32000;
 // The adapters ask their CLI who is signed in, and give that up after five seconds.
 const AUTH_STATUS_WAIT = 6000;
-const PRIMER = /<fireside-context>[\s\S]*?<\/fireside-context>\s*/;
+const PRIMER = /\s*<fireside-(context|images)>[\s\S]*?<\/fireside-\1>\s*/g;
 
 // The page gets plain fields to draw, never the agent's raw schema, and what
 // comes back is checked against those same fields before the agent sees it.
@@ -497,7 +497,7 @@ export class AcpChat {
       activeTurns: activeTurns(this.root), activeAgentTurns: activeTurns(this.root, this.agent), pending: this.pending.length });
     this.turn = Promise.resolve().then(() => {
       if (generation !== this.generation) throw fail('The conversation changed before delivery');
-      blocks.push(...images.map(name => imageBlock(this.root, name)));
+      blocks.push(...images.map(name => imageBlock(this.root, name)), ...images.length ? [imageNote(images)] : []);
       return this.connection.prompt({ sessionId, prompt: blocks });
     }).then(result => {
       if (generation !== this.generation) return;
