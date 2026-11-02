@@ -84,8 +84,7 @@ agent action names its tab, and session operations are tracked per tab.
 
 Saved conversations belong to the desk, not to a tab, so `acp.json` is written by
 ChatTabs alone: one `sessions` list, plus each tab's id and the conversation it
-should reopen. A file written before tabs, carrying a single `preferred`, becomes
-one tab. Tabs and the active one are restored on start, as a single chat was.
+should reopen. Tabs and the active one are restored on start.
 
 Each tab also journals its pending messages to `acp.json`.
 Acceptance is saved before it is acknowledged, and delivery intent is saved

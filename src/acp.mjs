@@ -142,6 +142,11 @@ export class AcpChat {
   get name() { return agents.get(this.root, this.agent)?.name || this.agent || 'your agent'; }
   changed() { this.touched = Date.now(); this.onChange(); }
   save() { this.store.save(); }
+  /** Save after something went wrong; what to add to that message if the save fails too. */
+  saveNote() {
+    try { this.save(); return ''; }
+    catch (error) { return ` Recovery could not be saved: ${error.message}`; }
+  }
   // The thread as the page draws it. Tool output stays out: it can run to megabytes.
   // While a sleeping chat wakes, its agent replays the conversation from the top;
   // the saved thread stays on screen until that replay is whole.
@@ -216,7 +221,7 @@ export class AcpChat {
     this.status = this.sessionId ? 'asleep' : 'error';
     this.error = error; this.signIn = signIn; this.changed();
   }
-  needSignIn() { this.halt(`Sign in to ${this.name} to continue.`, true); }
+  needSignIn(note = '') { this.halt(`Sign in to ${this.name} to continue.${note}`, true); }
   // `_auth/status_update`, which Claude and Codex push once they know who is signed
   // in. "none" is known to be signed out; silence is not.
   authUpdate(status) { this.authStatus = status?.kind; this.authReported(); }
@@ -463,8 +468,7 @@ export class AcpChat {
     if (images.length && !this.info?.agentCapabilities?.promptCapabilities?.image) {
       this.pending.splice(this.pending.indexOf(row), 1);
       row.state = 'dropped';
-      this.error = `${this.name} does not accept images, so a message with images was not sent.`;
-      try { this.save(); } catch {}
+      this.error = `${this.name} does not accept images, so a message with images was not sent.${this.saveNote()}`;
       this.changed();
       return this.next();
     }
@@ -514,8 +518,7 @@ export class AcpChat {
       if (error.code === AUTH_REQUIRED && generation === this.generation) {
         outcome = 'auth_required'; row.state = 'queued'; this.sendOnReady = true;
         if (first) this.history = this.history.filter(s => s.id !== sessionId);
-        try { this.save(); } catch {}
-        return this.needSignIn();
+        return this.needSignIn(this.saveNote());
       }
       outcome = 'transport_error';
       this.diagnostic('prompt_transport_error', { promptId: id, sessionId, agent: diagnostics.agent, agentPid: diagnostics.agentPid, ...errorSignal(error) });
@@ -526,7 +529,8 @@ export class AcpChat {
         this.pending.splice(this.pending.indexOf(row), 1);
         // The SDK reports an agent's thrown error as "Internal error", with the words in `data`.
         if (!this.connection.signal.aborted) this.error = error.data?.details || error.message;
-        try { this.save(); } catch {}
+        const note = this.saveNote();
+        if (note) this.error = `${this.error || ''}${note}`.trim();
       }
     }).finally(() => {
       endTurn(diagnostics.key);
@@ -579,9 +583,7 @@ export class AcpChat {
       await this.close();
       this.sessionId = sessionId;
       this.pending = this.pending.filter(row => { if (row.state !== 'delivered') return true; row.state = 'interrupted'; return false; });
-      let message = `${error.message}. The agent connection was closed. Reconnect to continue.`;
-      try { this.save(); } catch (writeError) { message += ` Recovery could not be saved: ${writeError.message}`; }
-      this.halt(message);
+      this.halt(`${error.message}. The agent connection was closed. Reconnect to continue.${this.saveNote()}`);
     }
   }
   async clear(sessionId) {
@@ -634,9 +636,10 @@ export class AcpChat {
       }
       // A replayed conversation brings back the images sent in it.
       if (u.content.type === 'image') {
-        try { this.message.images = [...this.message.images || [], saveImage(this.root, u.content)]; } catch {}
+        try { this.message.images = [...this.message.images || [], saveImage(this.root, u.content)]; }
+        catch (error) { this.message.text += `\n\n[An image here could not be kept: ${error.message}]`; }
       } else this.message.text += u.content.text;
-      // Legacy adapters emit terminal transport errors as plain assistant text.
+      // Codex's adapter sends a terminal transport error as plain assistant text.
       // Match only a whole error message; never log arbitrary assistant content.
       if (turn && role === 'assistant' && /^exceeded retry limit, last status:\s*[45]\d{2}(?:[ \t]+[^\r\n]+)?$/i.test(this.message.text.trim()) && !turn.errors.has(this.message.id)) {
         turn.errors.add(this.message.id);

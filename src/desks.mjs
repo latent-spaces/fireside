@@ -22,9 +22,6 @@ function read() {
   } catch { return []; }
 }
 
-/** Every folder this machine has opened a desk in, as far as the registry recalls. */
-export const dirs = () => read().map(desk => desk.dir);
-
 // Best effort throughout: a desk that cannot write the registry still runs.
 function write(desks) {
   try {

@@ -38,14 +38,19 @@ export class ChatTabs {
     this.sequence = 0;
     let saved = [];
     let active = null;
+    let unreadable = null;
     try {
       const stored = JSON.parse(fs.readFileSync(this.file, 'utf8'));
       this.sessions = stored.sessions || [];
-      // A desk written before tabs kept a single `preferred` conversation.
-      saved = Array.isArray(stored.tabs) && stored.tabs.length ? stored.tabs
-        : stored.preferred ? [{ id: randomUUID(), preferred: stored.preferred }] : [];
+      saved = Array.isArray(stored.tabs) ? stored.tabs : [];
       active = stored.active || null;
-    } catch {}
+    } catch (error) {
+      // Set aside, not written over: the file may still hold what the desk couldn't read.
+      if (error instanceof SyntaxError) {
+        fs.renameSync(this.file, `${this.file}.unreadable`);
+        unreadable = `Your saved chats could not be read: ${error.message}. The file was kept as ${path.basename(this.file)}.unreadable.`;
+      } else if (error.code !== 'ENOENT') throw error;
+    }
     for (const tab of saved) {
       if (!tab?.id || this.reopen.has(tab.id)) continue;
       this.reopen.set(tab.id, tab.preferred || null);
@@ -53,6 +58,7 @@ export class ChatTabs {
     }
     if (!this.tabs.length) this.open();
     this.activeId = this.get(active) ? active : this.tabs[0].id;
+    if (unreadable) this.active.acp.error = unreadable;
     // The tab on screen never sleeps: it may be running something its agent
     // does not report, like a loop or a background command.
     this.napping = setInterval(() => {

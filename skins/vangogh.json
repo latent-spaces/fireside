@@ -33,7 +33,7 @@
     "--shadow-hi": "0 26px 56px -16px rgba(2,6,20,.92), 0 3px 10px -4px rgba(2,6,20,.75)"
   },
   "base": "dark",
-  "css": ".win{backdrop-filter:blur(9px) saturate(1.1);border-width:1px}\n.win.focused{border-color:rgba(244,197,66,.55)}\n.menubar,.composer,.dock{backdrop-filter:blur(18px) saturate(1.15)}\n.wall{filter:saturate(1.05)}",
+  "css": ".win{backdrop-filter:blur(9px) saturate(1.1);border-width:1px}\n.win.focused{border-color:rgba(244,197,66,.55)}\n.menubar,.dock{backdrop-filter:blur(18px) saturate(1.15)}\n.wall{filter:saturate(1.05)}",
   "tint": {
     "from": 206,
     "span": 46

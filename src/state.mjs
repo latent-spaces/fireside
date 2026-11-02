@@ -60,15 +60,6 @@ export function validateState(raw, dir) {
     ids.add(panel.id);
   }
   if (!state.theme || typeof state.theme !== 'object') throw new Error('theme must be an object');
-  state.theme = { ...state.theme };
-  delete state.theme.mode;
-  // theme.accent only ever coloured the default skin. theme.vars apply over any
-  // skin; a custom accent carries over, the old default is just dropped.
-  if ('accent' in state.theme) {
-    const { accent } = state.theme;
-    if (typeof accent === 'string' && accent.toUpperCase() !== '#F2789F') state.theme.vars = { '--accent': accent, ...state.theme.vars };
-    delete state.theme.accent;
-  }
   const { vars } = state.theme;
   if (vars !== undefined && (!vars || typeof vars !== 'object' || Array.isArray(vars) || Object.values(vars).some((v) => typeof v !== 'string'))) {
     throw new Error('theme.vars must map CSS variables to strings');

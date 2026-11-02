@@ -463,6 +463,6 @@ export function updateAgentControls(state) {
       if (dock) dock.ask(); else if (chat?.contains(document.activeElement) || document.activeElement === document.body) bar?.querySelector('textarea')?.focus();
     }
     const box = chat?.querySelector('textarea');
-    if (box) box.placeholder = active ? `Message ${name}…` : 'Reply to Claude…';
+    if (box) box.placeholder = active ? `Message ${name}…` : 'Message your agent…';
   }
 }

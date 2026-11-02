@@ -57,7 +57,7 @@ const skins = createSkins({ $, el, request, onApplied: (skin) => {
   notify('theme', skin);
 } });
 
-// Shared commands are supplied by components, including the tray composer.
+// Shared commands are supplied by components.
 const runtime = createRuntime(error => composerNote(`Component update failed: ${error.message}`));
 const { command } = runtime;
 const arm = (...args) => command('arm', ...args);
@@ -152,7 +152,7 @@ function openKind(kind) {
   const existing = store.state?.panels?.find((p) => p.kind === kind);
   if (existing) return openWin(existing.id);
   return request('/api/panel/add', { kind }).then(({ id }) => { pendingOpen = id; })
-    .catch((error) => composerNote(`Could not open that window: ${error.message}`));
+    .catch((error) => { composerNote(`Could not open that window: ${error.message}`); return false; });
 }
 
 function actionRow(items) {
@@ -407,8 +407,6 @@ function applySnapshot(view) {
   tourWhenReady();
 }
 
-runtime.subscribe('subscriptions', () => fire?.sync());
-
 const { syncUpdateButton } = createMenus({ $, el, esc, store, request, composerNote, openWin, arm, pickComponentFile });
 
 $('tidyBtn').addEventListener('click', tidy);
@@ -453,8 +451,8 @@ function liftSplash() {
 }
 
 // What this machine has already seen. Read once a page; `toured` is the mark that
-// no folder needs the tour again. A server too old to say counts as seen.
-let machine = { toured: true, agent: null };
+// no folder needs the tour again.
+let machine = null;
 let fire = null, desked = false, touring = false;
 
 // The tour shows a working desk, so it waits for the fire and an open chat. It
@@ -471,7 +469,7 @@ function tourWhenReady() {
 }
 
 // Windows load before the first snapshot, so every panel has its kind on arrival.
-const firstRun = fetch('/api/first-run').then((response) => response.json()).then((seen) => { if (typeof seen?.toured === 'boolean') machine = seen; }).catch(() => {});
+const firstRun = fetch('/api/first-run').then((response) => response.json()).then((seen) => { machine = seen; });
 Promise.all([skins.load().then((list) => { store.skins = list; }), loadWindows(ctx), firstRun]).then(() => connectDesk({ store, notify, render,
   snapshot(d) {
     // The shell this page runs is no longer the one on disk: an edit to client/,

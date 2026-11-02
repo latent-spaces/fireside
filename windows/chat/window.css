@@ -1,9 +1,3 @@
-.composer{display:flex;gap:7px;align-items:flex-end;width:min(680px,100%);
-  background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(16px) saturate(1.3);
-  border:1.5px solid var(--line);border-radius:18px;padding:6px 6px 6px 14px;box-shadow:var(--shadow)}
-.composer textarea{flex:1;font:inherit;font-size:14px;line-height:1.45;resize:none;background:none;
-  color:var(--ink);border:0;padding:7px 0;max-height:140px;overflow-y:hidden;font-family:var(--sans)}
-.composer textarea:focus{outline:none}
 .send{font-size:15px;background:var(--accent);color:#fff;border:0;border-radius:13px;
   width:36px;height:36px;flex:none;cursor:pointer;display:grid;place-items:center;transition:transform .14s}
 :root[data-theme=dark] .send{color:#2B1B24}
@@ -256,7 +250,7 @@
 .request-error-notice pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0 0;font-family:var(--mono)}
 
 /* ---------- images in a message ---------- */
-.composer,.chat .cbar{flex-wrap:wrap}
+.chat .cbar{flex-wrap:wrap}
 .attached{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 4px}
 .attached[hidden]{display:none}
 .attached-item{position:relative;display:block}
@@ -265,10 +259,9 @@
   background:var(--ink);color:var(--surface);font-size:12px;line-height:18px;padding:0;cursor:pointer}
 .attach{flex:none;width:32px;height:32px;border:0;border-radius:11px;background:none;color:var(--ink-3);
   cursor:pointer;display:grid;place-items:center}
-.composer .attach{width:36px;height:36px;margin-left:-8px}
 .attach:hover{color:var(--ink);background:var(--sunk)}
 .attach[hidden]{display:none}
-.chat.dropping .cbar textarea,.composer.dropping{outline:2px dashed var(--accent);outline-offset:-2px}
+.chat.dropping .cbar textarea{outline:2px dashed var(--accent);outline-offset:-2px}
 .msg-images{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
 .msg-images:last-child{margin-bottom:0}
 .msg-images img{display:block;max-height:160px;max-width:100%;border-radius:8px}

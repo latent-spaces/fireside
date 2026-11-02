@@ -46,14 +46,14 @@ export default {
   // as an HTML string using the shared .mk-* shapes (see client/app.css).
   // Without one, the menu shows the window's icon.
   preview: () => '<i class="mk-l mk-h"></i><i class="mk-l"></i>',
-  // Existing update(root, news, panel, ctx) and manifest feeds remain supported.
+  // update(root, news, panel, ctx) takes the news from the feeds in window.json.
 };
 ```
 
 Every trusted window can use `ctx.save` and the shared JSON request helper
 `ctx.request(route, payload)`. Existing helpers such as
 `el`, `esc`, `md`, `fileURL`, `actionRow`, `chooseSkin`, `send`, and project-scoped
-`recovery` remain available. `ctx.store` provides shared desk state and live feeds;
+`recovery` are available. `ctx.store` provides shared desk state and live feeds;
 there is no per-window permission system.
 
 `setup` and `render` contexts both provide `onDispose`, `provide(name, action)`,
@@ -63,8 +63,8 @@ shows an error or short message. `ctx.onDrag` provides the shared drag lifecycle
 register its returned cleanup through `onDispose`. `ctx.slots.tray` is a DOM mount
 point for component controls; remove mounted nodes through `onDispose`.
 
-The built-in chat uses `setup` to supply shared `arm`, `send`, `focusComposer`, and
-`rescueDraft` commands and mount its tray input. Its ZIP includes its controls,
+The built-in chat uses `setup` to supply shared `arm`, `send`, and `focusComposer`
+commands. `arm` opens Chat if it is closed. Its ZIP includes its controls,
 draft helper, and styles; it has no imports from private shell modules.
 
 Instances may set `reopenToken` to reopen when a new token arrives and

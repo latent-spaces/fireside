@@ -12,8 +12,7 @@ export function shouldLight(state, tabs) {
   const params = new URLSearchParams(location.search);
   if (params.has('notour')) return false;
   if (params.has('fire')) return true;
-  // A desk from before `lit` shows it connected with the old greeting's mark.
-  return !state.lit && !state.greeting?.shown && !tabs?.tabs?.some((tab) => tab.agent) && state.panels.some((panel) => panel.kind === 'chat');
+  return !state.lit && !tabs?.tabs?.some((tab) => tab.agent) && state.panels.some((panel) => panel.kind === 'chat');
 }
 
 const node = (tag, cls, text) => {

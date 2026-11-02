@@ -290,7 +290,7 @@ export function createRoutes(context: RouteContext) {
       markToured();
       return json(res, { ok: true });
     },
-    'GET /api/first-run': async (_req, res) => json(res, firstRun(ROOT)),
+    'GET /api/first-run': async (_req, res) => json(res, firstRun()),
     'GET /api/ping': async (_req, res) => json(res, { ok: true, root: ROOT, pid: process.pid, code: codeId, busy: !!busyChat() }),
     'GET /api/windows': async (_req, res) => json(res, { windows: windowList(), revision: revision() }),
   };

@@ -10,33 +10,16 @@ export default {
     return chat;
   },
   render(panel, ctx) { return chat.render(panel, ctx); },
-  beforeClose(root, panel, ctx) {
-    const draft = root?.querySelector('textarea')?.value;
-    if (draft) ctx.command('rescueDraft', draft);
-  },
 };
 
 function createChat(ctx) {
   const { el, esc, md, store, request, notice: composerNote, onDrag } = ctx;
-  const trayForm = el('form', 'composer');
-  trayForm.id = 'composer';
-  const trayInput = el('textarea');
-  trayInput.id = 'input'; trayInput.rows = 1; trayInput.spellcheck = false;
-  trayInput.placeholder = 'Ask Claude to do something, or rearrange this desktop…';
-  trayInput.setAttribute('aria-label', 'Message agent');
-  const traySend = el('button', 'send', '➜');
-  traySend.id = 'send'; traySend.type = 'submit'; traySend.disabled = true;
-  traySend.setAttribute('aria-label', 'Send');
-  trayForm.append(attachStrip(), attachButton(() => trayInput), trayInput, traySend);
-  ctx.slots.tray.append(trayForm);
-  ctx.onDispose(() => trayForm.remove());
-  const activeInput = () => document.querySelector('.chat textarea') || trayInput;
+  const activeInput = () => document.querySelector('.chat textarea');
   const fmtTokens = (n) => (n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(n >= 1e5 ? 0 : 1) + 'k' : String(n || 0));
   function rememberDraft(box) {
+    const id = box.dataset.draftKey;
+    drafts.set(id, box.value);
     if (!ctx.recovery) return false;
-    const id = box === trayInput ? 'tray' : box.dataset.draftKey;
-    if (!id) return false;
-    if (id !== 'tray') drafts.set(id, box.value);
     return box.value ? ctx.recovery.write(`draft:${id}`, box.value) : ctx.recovery.remove(`draft:${id}`);
   }
 
@@ -47,28 +30,43 @@ function createChat(ctx) {
     if (store.acp?.agent) return true;
     composerNote(liveChats().length
       ? 'This chat has no agent yet. Choose one above, or switch to a chat that is already connected.'
-      : 'Connect Claude or Codex in the Chat window first.');
+      : 'Connect an agent in the Chat window first.');
     return false;
   }
 
+  async function send(prompt, label) {
+    if (!prompt?.trim() || !canSend()) return false;
+    try {
+      await request('/api/action', { prompt, label: label || prompt.slice(0, 60), id: crypto.randomUUID(), sessionId: store.acp?.sessionId });
+      return true;
+    } catch (error) { composerNote(`Not sent: ${error.message}`); return false; }
+  }
+
+  const waiting = [];   // prompts prepared while Chat is closed; the window takes them when it opens
   function arm(prompt, { immediate = false, label } = {}) {
-    if (immediate) return dispatch(prompt, label);
+    if (immediate) return send(prompt, label);
     const box = activeInput();
+    if (box) return prepare(box, prompt);
+    if (waiting.push(prompt) > 1) return;
+    // Chat may already be on its way; a window that can't open takes nothing with it.
+    Promise.resolve(ctx.openKind('chat')).then((opened) => { if (opened === false) waiting.length = 0; });
+  }
+  function prepare(box, prompt) {
     const start = appendDraft(box, prompt);
     autosize(box);
     box.focus();
     box.setSelectionRange(start, box.value.length);
     if (start) composerNote('Added below your existing draft. Review both before sending.');
     const btn = sendButton(box);
-    if (btn) { btn.classList.add('armed'); btn.disabled = false; }
+    btn.classList.add('armed'); btn.disabled = false;
   }
 
   // --- images --------------------------------------------------------------------
   // Each draft has its own images, kept by the same key as its text.
   const pictures = new Map();
-  const keyOf = (box) => box === trayInput ? 'tray' : box.dataset.draftKey;
+  const keyOf = (box) => box.dataset.draftKey;
   const attached = (box) => pictures.get(keyOf(box)) || [];
-  const sendButton = (box) => box === trayInput ? traySend : box.closest('form')?.querySelector('.send');
+  const sendButton = (box) => box.closest('form').querySelector('.send');
   const hasContent = (box) => !!box.value.trim() || attached(box).length > 0;
   function setAttached(box, list) {
     if (list.length) pictures.set(keyOf(box), list); else pictures.delete(keyOf(box));
@@ -79,7 +77,7 @@ function createChat(ctx) {
   // this draft is redrawn, not only the one the send started from.
   function showAttached(from) {
     const key = keyOf(from);
-    const boxes = new Set([from, ...[...document.querySelectorAll('.chat textarea, #input')].filter((b) => keyOf(b) === key)]);
+    const boxes = new Set([from, ...[...document.querySelectorAll('.chat textarea')].filter((b) => keyOf(b) === key)]);
     boxes.forEach(drawAttached);
   }
   function drawAttached(box) {
@@ -97,8 +95,7 @@ function createChat(ctx) {
       item.append(img, x);
       return item;
     }));
-    const btn = sendButton(box);
-    if (btn) btn.disabled = !hasContent(box);
+    sendButton(box).disabled = !hasContent(box);
   }
   async function attach(box, files) {
     files = imageFiles(files);
@@ -120,7 +117,7 @@ function createChat(ctx) {
   /** The paperclip shows while the chat's agent may take images. */
   function refreshAttach() {
     const off = store.acp?.status === 'ready' && !store.acp.images;
-    document.querySelectorAll('.chat .attach, #composer .attach').forEach((btn) => { btn.hidden = off; });
+    document.querySelectorAll('.chat .attach').forEach((btn) => { btn.hidden = off; });
   }
   function attachStrip() {
     const strip = el('div', 'attached');
@@ -139,30 +136,30 @@ function createChat(ctx) {
     return btn;
   }
   /** Paste into the box, or drop anywhere on `zone`. */
-  function takeImages(box, zone, options) {
+  function takeImages(box, zone) {
     box.addEventListener('paste', (e) => {
       const files = imageFiles(e.clipboardData?.files);
       if (!files.length) return;
       // A file copied in Finder also carries its name as text; take the image alone.
       e.preventDefault();
       attach(box, files);
-    }, options);
+    });
     const carriesFiles = (e) => [...e.dataTransfer?.types || []].includes('Files');
     zone.addEventListener('dragover', (e) => {
       if (!carriesFiles(e)) return;
       e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; zone.classList.add('dropping');
-    }, options);
-    zone.addEventListener('dragleave', (e) => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('dropping'); }, options);
+    });
+    zone.addEventListener('dragleave', (e) => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('dropping'); });
     zone.addEventListener('drop', (e) => {
       zone.classList.remove('dropping');
       if (!carriesFiles(e)) return;
       e.preventDefault();
       attach(box, e.dataTransfer.files);
-    }, options);
+    });
   }
 
   const submissions = new WeakMap();
-  async function dispatch(prompt, label, box = activeInput()) {
+  async function dispatch(prompt, box) {
     const draftKey = box.dataset.draftKey;
     const images = attached(box);
     if (!prompt?.trim() && !images.length) return;
@@ -175,13 +172,13 @@ function createChat(ctx) {
     }
     submission.sending = true;
     try {
-      await request('/api/action', { prompt, label: label || prompt.slice(0, 60), id: submission.id, sessionId: store.acp?.sessionId,
+      await request('/api/action', { prompt, label: prompt.slice(0, 60), id: submission.id, sessionId: store.acp?.sessionId,
         images: images.map(({ data, mimeType }) => ({ data, mimeType })) });
       if (box.value === prompt && box.dataset.draftKey === draftKey) { box.value = ''; autosize(box); rememberDraft(box); }
       if (attached(box) === images) setAttached(box, []);
       submissions.delete(box);
       const btn = sendButton(box);
-      if (btn) { btn.classList.remove('armed'); btn.disabled = !hasContent(box); }
+      btn.classList.remove('armed'); btn.disabled = !hasContent(box);
     } catch (error) {
       composerNote(`Message was not confirmed: ${error.message}. Your draft is preserved; retry to confirm delivery.`);
     } finally { submission.sending = false; }
@@ -259,7 +256,7 @@ function createChat(ctx) {
     // A close request can fail (for example, while it still has queued work).
     // Only discard a tab's draft once the server confirms the tab is gone.
     for (const id of drafts.keys()) if (!view.tabs.some(t => t.id === id)) { drafts.delete(id); ctx.recovery?.remove(`draft:${id}`); }
-    for (const id of pictures.keys()) if (id !== 'tray' && !view.tabs.some(t => t.id === id)) pictures.delete(id);
+    for (const id of pictures.keys()) if (!view.tabs.some(t => t.id === id)) pictures.delete(id);
     shownTab = view.active;
     // Until one chat has an agent there is nothing to switch between.
     const show = view.tabs.some((t) => t.agent);
@@ -353,12 +350,12 @@ function createChat(ctx) {
     return add;
   }
 
-  function autosize(box = trayInput) {
+  function autosize(box) {
     box.style.height = 'auto';
     // A composer behind the setup card is not on screen, so it measures nothing.
     // Leave it at its natural single line rather than freezing it at zero height.
     if (!box.scrollHeight) { box.style.overflowY = 'hidden'; return; }
-    const max = box === trayInput ? 140 : 96;
+    const max = 96;
     box.style.height = Math.min(box.scrollHeight, max) + 'px';
     box.style.overflowY = box.scrollHeight > max ? 'auto' : 'hidden';
   }
@@ -374,12 +371,12 @@ function createChat(ctx) {
     woken = chat.tabId;
     request('/api/agent/wake', { tab: chat.tabId }).catch(() => { woken = null; });
   }
-  function wireComposer(box, btn, form, options) {
-    box.addEventListener('input', () => { autosize(box); rememberDraft(box); btn.disabled = !hasContent(box); btn.classList.remove('armed'); wakeOnTyping(box); }, options);
+  function wireComposer(box, btn, form) {
+    box.addEventListener('input', () => { autosize(box); rememberDraft(box); btn.disabled = !hasContent(box); btn.classList.remove('armed'); wakeOnTyping(box); });
     box.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); dispatch(box.value, null, box); }
-    }, options);
-    form.addEventListener('submit', (e) => { e.preventDefault(); dispatch(box.value, null, box); }, options);
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); dispatch(box.value, box); }
+    });
+    form.addEventListener('submit', (e) => { e.preventDefault(); dispatch(box.value, box); });
   }
 
 
@@ -455,7 +452,7 @@ function createChat(ctx) {
       if (m.text && m.text !== m.tool) row.append(el('span', 'td', esc(m.text)));
       return row;
     }
-    const agent = agentName(store.acp) || 'Claude';
+    const agent = agentName(store.acp) || 'Agent';
     const failure = requestError(m);
     if (failure) {
       row.classList.remove('assistant');
@@ -532,25 +529,19 @@ function createChat(ctx) {
       const form = el('form', 'cbar');
       const box = el('textarea');
       box.rows = 1;
-      box.dataset.draftKey = store.tabs?.active || 'tray';
-      box.value = drafts.get(store.tabs?.active) || '';
-      appendDraft(box, trayInput.value);
-      const copied = rememberDraft(box);
-      trayInput.value = '';
-      if (copied) rememberDraft(trayInput);
-      box.placeholder = store.acp?.agent ? `Message ${agentName(store.acp)}…` : 'Reply to Claude…';
+      box.dataset.draftKey = store.tabs.active;
+      box.value = drafts.get(store.tabs.active) || '';
+      box.placeholder = store.acp?.agent ? `Message ${agentName(store.acp)}…` : 'Message your agent…';
       box.setAttribute('aria-label', 'Message agent');
       box.spellcheck = false;
       const btn = el('button', 'send', '➜');
       btn.type = 'submit';
-      // The tray's images move into the chat along with its text.
-      if (pictures.has('tray') && box.dataset.draftKey !== 'tray') { pictures.set(box.dataset.draftKey, [...pictures.get(box.dataset.draftKey) || [], ...pictures.get('tray')]); pictures.delete('tray'); showAttached(trayInput); }
       btn.disabled = !hasContent(box);
       form.append(attachStrip(), attachButton(() => box), box, btn);
       wrap.append(form);
       wireComposer(box, btn, form);
       takeImages(box, wrap);
-      queueMicrotask(() => { showAttached(box); refreshAttach(); });
+      queueMicrotask(() => { showAttached(box); refreshAttach(); for (const prompt of waiting.splice(0)) prepare(box, prompt); });
 
       // Land at the newest message, the way a chat should open.
       queueMicrotask(() => { msgs.scrollTop = msgs.scrollHeight; });
@@ -565,33 +556,18 @@ function createChat(ctx) {
       const text = ctx.recovery.read(`draft:${tab.id}`);
       if (typeof text === 'string') drafts.set(tab.id, text);
     }
-    const tray = ctx.recovery.read('draft:tray');
-    if (typeof tray === 'string') appendDraft(trayInput, tray);
   }
-  const controller = new AbortController();
-  wireComposer(trayInput, traySend, trayForm, { signal: controller.signal });
-  takeImages(trayInput, trayForm, { signal: controller.signal });
   ctx.provide('arm', arm);
-  ctx.provide('focusComposer', () => activeInput().focus());
-  ctx.provide('rescueDraft', (text) => { appendDraft(trayInput, text); autosize(trayInput); traySend.disabled = !trayInput.value.trim(); });
-  ctx.provide('send', async (prompt, label) => {
-    if (!prompt?.trim() || !canSend()) return false;
-    try {
-      await request('/api/action', { prompt, label: label || prompt.slice(0, 60), id: crypto.randomUUID(), sessionId: store.acp?.sessionId });
-      return true;
-    } catch (error) { composerNote(`Not sent: ${error.message}`); return false; }
-  });
-  ctx.onDispose(() => controller.abort());
+  ctx.provide('focusComposer', () => activeInput()?.focus());
+  ctx.provide('send', send);
   ctx.subscribe('snapshot', restoreDrafts);
   ctx.subscribe('chat', () => { updateAgentControls(store.acp); refreshAttach(); renderTabs(); renderChatUsage(); redrawThreads(); });
   ctx.subscribe('tabs', renderTabs);
-  ctx.subscribe('desktop', () => { trayForm.hidden = !!document.querySelector('.chat textarea'); });
   restoreDrafts();
-  autosize();
   return {
     render,
     prepareReload() {
-      for (const input of document.querySelectorAll('.chat textarea, #input')) {
+      for (const input of document.querySelectorAll('.chat textarea')) {
         if (input.value && !rememberDraft(input)) throw new Error('Your draft could not be saved');
       }
     },

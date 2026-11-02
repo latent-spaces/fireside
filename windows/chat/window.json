@@ -1,6 +1,8 @@
 {
   "icon": "💬",
   "title": "Chat",
+  "description": "Talk to your agents.",
+  "catalogue": true,
   "height": 420,
   "aloneWidth": 760,
   "fill": true

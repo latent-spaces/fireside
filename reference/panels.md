@@ -162,7 +162,7 @@ desktop Origin and request header, and an existing icon ID as its only input.
 Commands are read from the state file; the browser cannot replace that file or
 supply executable arguments. The process launches without a shell. `--app`
 extracts the native macOS icon, `--exec` parses quoted arguments, and `--cmd`
-accepts an explicit JSON array. `theme.mode` remains removed; choose a skin instead.
+accepts an explicit JSON array.
 
 ## Skins
 
