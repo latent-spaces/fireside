@@ -22,6 +22,11 @@ export const deadline = (promise, ms, message) => {
 const CONTEXT = `You are running inside Fireside, a browser desktop for this project. The user is talking to you through its Chat window, connected over the Agent Client Protocol; your replies already appear there.
 Before creating or changing Fireside panels, or answering what the user can do here, read the Fireside skill at ${path.join(PKG_ROOT, 'SKILL.md')} and follow it. The desk is already running, so do not run \`fireside start\`. Use the \`fireside\` CLI on PATH to keep panels current while you work.
 A sentence you write just before a tool call can reach the user reworded and without its links or codes. When the user must see or act on something before you continue (a link to open, a code to check, a choice), give it to them in a reply that ends your turn, or ask with your question tool if you have one. Do not follow it with a tool call that waits.`;
+// ACP's `authRequired` error. An agent can send it from any call, not only session
+// setup, and it means the call did nothing.
+const AUTH_REQUIRED = -32000;
+// The adapters ask their CLI who is signed in, and give that up after five seconds.
+const AUTH_STATUS_WAIT = 6000;
 const PRIMER = /<fireside-context>[\s\S]*?<\/fireside-context>\s*/;
 
 // The page gets plain fields to draw, never the agent's raw schema, and what
@@ -87,10 +92,12 @@ export class AcpChat {
     this.toolActivity = new Map();
     this.spawnAgent = spawnAgent;
     this.includeContext = includeContext;
-    // Pending work is durable and independent of the bounded display history.
-    // A process exit cannot tell us whether an in-flight prompt ran at the agent.
-    this.pending = pending.map(row => ({ ...row, state: 'queued',
-      deliveryUnknown: row.deliveryUnknown || row.state === 'delivered' }));
+    // Pending work is durable and independent of the bounded display history. A
+    // message that was on its way when the server stopped counts as sent: it is
+    // never sent twice by itself, and the user can see whether it needs sending again.
+    const waiting = pending.filter(row => row.state !== 'delivered' && !row.deliveryUnknown);
+    this.pending = waiting.map(row => ({ ...row, state: 'queued' }));
+    if (waiting.length < pending.length) this.error = 'The last reply was cut off. Send your message again if it didn’t finish.';
     this.rows = [...this.pending];
     this.permissions = new Map();
     this.questions = new Map();
@@ -113,7 +120,9 @@ export class AcpChat {
   get preferred() { return this.store.preferred(this.id); }
   set preferred(value) { this.store.setPreferred(this.id, value); }
   view() {
+    if (this.held) return { ...this.held.view, sessions: this.history, waking: true };
     return { tabId: this.id, agent: this.agent, sessionId: this.sessionId, status: this.status, error: this.error || null,
+      signIn: !!this.signIn,
       commands: this.commands, agents: agents.view(this.root), sessions: this.history, model: this.model(), effort: this.effort(), settings: this.settings(),
       authMethods: this.authMethods(),
       preferred: this.preferred,
@@ -137,7 +146,7 @@ export class AcpChat {
   // While a sleeping chat wakes, its agent replays the conversation from the top;
   // the saved thread stays on screen until that replay is whole.
   get shown() {
-    const rows = this.backdrop ? [...this.backdrop.filter(row => !this.pending.includes(row)), ...this.pending] : this.rows;
+    const rows = this.held ? [...this.held.rows.filter(row => !this.pending.includes(row)), ...this.pending] : this.rows;
     return rows.map(({ content, rawInput, rawOutput, locations, ...row }) => row); }
   /** Save what the chat window needs to show this conversation with no agent running. */
   remember() {
@@ -145,7 +154,7 @@ export class AcpChat {
     const queued = new Set(this.pending.map(row => row.id));
     try {
       this.store.remember(this.id, { agent: this.agent, sessionId: this.sessionId, canLoad: !!this.info?.agentCapabilities?.loadSession,
-        rows: this.shown.filter(row => !queued.has(row.id) && row.id !== 'delivery-unknown'),
+        rows: this.shown.filter(row => !queued.has(row.id)),
         configOptions: this.configOptions, commands: this.commands, usage: this.contextUsage() });
     } catch (error) { console.error(`Cannot save the transcript of chat ${this.id}: ${error.message}`); }
   }
@@ -157,12 +166,7 @@ export class AcpChat {
   }
   attachPending() {
     const ids = new Set(this.pending.map(row => row.id));
-    this.rows = this.rows.filter(row => !ids.has(row.id) && row.id !== 'delivery-unknown');
-    const uncertain = this.pending.some(row => row.deliveryUnknown);
-    if (uncertain) {
-      this.error = 'The outcome of a previous message is unknown. Check the conversation, then remove that message from the queue before sending again. It will not be replayed automatically.';
-      this.rows.push({ id: 'delivery-unknown', role: 'divider', text: this.error });
-    }
+    this.rows = this.rows.filter(row => !ids.has(row.id));
     this.rows.push(...this.pending);
   }
   /** @returns {import("./contracts.ts").Picker | null} */
@@ -187,6 +191,7 @@ export class AcpChat {
   }
   // The chat's token badge: the adapter's last usage_update, named after the chosen model.
   usageView() {
+    if (this.held) return this.held.usage;
     const usage = this.contextUsage();
     if (!usage) return null;
     const model = this.model();
@@ -198,6 +203,23 @@ export class AcpChat {
   contextUsage() {
     return this.usage || (this.sessionId && this.lastUsage?.sessionId === this.sessionId ? this.lastUsage.usage : null);
   }
+  // Every failure ends here. A chat with a conversation stays on it, asleep, with
+  // the error beside it: sending or Try again picks it up. Only a chat with nothing
+  // to keep goes back to the agent picker.
+  halt(error, signIn = false) {
+    const thread = (this.held?.rows || this.rows).some(row => row.role === 'user' && !this.pending.includes(row));
+    // An agent only keeps a conversation that got a message; there's none to go back to.
+    if (!thread && !this.history.some(s => s.id === this.sessionId)) {
+      this.sessionId = null;
+      for (const row of this.pending) row.sessionId = null;
+    }
+    this.status = this.sessionId ? 'asleep' : 'error';
+    this.error = error; this.signIn = signIn; this.changed();
+  }
+  needSignIn() { this.halt(`Sign in to ${this.name} to continue.`, true); }
+  // `_auth/status_update`, which Claude and Codex push once they know who is signed
+  // in. "none" is known to be signed out; silence is not.
+  authUpdate(status) { this.authStatus = status?.kind; this.authReported(); }
   async setModel(value, sessionId) {
     return this.setSelectOption(this.model(), value, sessionId, 'model');
   }
@@ -258,11 +280,18 @@ export class AcpChat {
   /** Start a sleeping chat's agent on the conversation it shows. One wake at a time. */
   wake() {
     if (this.waking || this.status !== 'asleep') return this.waking || Promise.resolve();
-    this.backdrop = this.rows;
+    // Reconnecting clears the session and its settings on the way. The page goes on
+    // showing the chat as it was, so a wake is invisible unless it fails.
+    const { rows, configOptions, commands } = this;
+    this.held = { view: this.view(), usage: this.usageView(), rows };
     this.waking = this.connect(this.agent, this.sessionId, { restoring: true }).then(() => {
       // A wake that failed keeps the thread on screen beside its error.
-      if (['error', 'disconnected'].includes(this.status)) { this.rows = this.backdrop; this.attachPending(); }
-    }).finally(() => { this.waking = null; this.backdrop = null; this.changed(); });
+      if (this.status !== 'ready') { Object.assign(this, { rows, configOptions, commands }); this.attachPending(); }
+      // An agent that can't resume starts over, but the thread is still the user's.
+      else if (!this.info?.agentCapabilities?.loadSession) { this.rows = rows; this.attachPending(); }
+      // The agent's replay may not have a turn that died, and the user may want to send it again.
+      else this.rows.push(...rows.filter(row => row.state === 'interrupted' && row.role === 'user' && !this.rows.some(r => r.role === 'user' && r.text === row.text)));
+    }).finally(() => { this.waking = null; this.held = null; this.changed(); });
     return this.waking;
   }
   async restore() {
@@ -287,7 +316,9 @@ export class AcpChat {
     await this.close();
     const generation = ++this.generation;
     this.agent = agent; this.rows = []; this.sessionId = resume; this.attachPending();
-    this.status = 'connecting'; this.error = null; this.changed();
+    this.status = 'connecting'; this.error = null; this.signIn = false; this.changed();
+    this.authStatus = null;
+    this.authKnown = new Promise(resolve => { this.authReported = resolve; });
     let unstarted = null;
     try {
       // Every desk shares one node_modules, so another desk may be installing
@@ -317,11 +348,12 @@ export class AcpChat {
         sessionUpdate: params => { if (generation === this.generation) this.update(params); },
         requestPermission: params => generation === this.generation ? this.permission(params) : { outcome: { outcome: 'cancelled' } },
         createElicitation: params => generation === this.generation ? this.question(params) : { action: 'cancel' },
+        extNotification: (method, params) => { if (generation === this.generation && method === '_auth/status_update') this.authUpdate(params?.authStatus); },
       }), ndJsonStream(Writable.toWeb(child.stdin), Readable.toWeb(child.stdout)));
       this.connection.closed.then(() => {
         if (generation !== this.generation) return;
         this.diagnostic('agent_disconnected');
-        this.cancelPermissions(); this.status = 'error'; this.error = 'Agent disconnected. Reconnect to continue.'; this.changed();
+        this.cancelPermissions(); this.halt('Agent disconnected. Reconnect to continue.');
       });
       const info = await deadline(this.connection.initialize({ protocolVersion: 1, clientCapabilities: { elicitation: { form: {} } }, clientInfo: { name: 'fireside', version: '0.1.0' } }), 20000, 'Agent startup timed out');
       if (generation !== this.generation) return;
@@ -332,7 +364,8 @@ export class AcpChat {
     } catch (error) {
       if (generation !== this.generation) return;
       this.diagnostic('agent_connect_error', errorSignal(error));
-      this.status = 'error'; this.error = unstarted || error.message; this.changed();
+      if (error.code === AUTH_REQUIRED) return this.needSignIn();
+      this.halt(unstarted || error.data?.details || error.message);
     }
   }
   async newSession(resume = null) {
@@ -346,6 +379,12 @@ export class AcpChat {
       const params = { cwd: this.root, mcpServers: [], ...(this.includeContext && this.agent === 'claude' && { _meta: { systemPrompt: { append: CONTEXT } } }) };
       const result = await deadline(resume ? this.connection.loadSession({ ...params, sessionId: resume }) : this.connection.newSession(params), 25000, 'Session setup timed out. Reconnect to try again.');
       if (generation !== this.generation) return;
+      // A session doesn't prove a login: Claude opens one signed out and only
+      // refuses the first message. So don't call the chat ready before it says who
+      // it is, which it usually has by now.
+      if (this.info?.agentCapabilities?._meta?.authStatus) await deadline(this.authKnown, AUTH_STATUS_WAIT, 'No auth status').catch(() => {});
+      if (generation !== this.generation) return;
+      if (this.authStatus === 'none') throw Object.assign(new Error('Authentication required'), { code: AUTH_REQUIRED });
       this.configOptions = result.configOptions || this.configOptions;
       this.sessionId = resume || result.sessionId;
       if (!this.sessionId) throw new Error('Agent returned no session ID');
@@ -373,13 +412,18 @@ export class AcpChat {
   async authenticate(methodId) {
     const methods = this.authMethods();
     const method = methods.find(m => m.id === methodId) || (methods.length === 1 && !methodId ? methods[0] : null);
-    if (!method || this.status !== 'error') throw fail('Sign in with the agent CLI, then reconnect');
+    if (!method || (this.status !== 'error' && !this.signIn)) throw fail('Sign in with the agent CLI, then reconnect');
     const generation = this.generation;
-    this.status = 'authenticating'; this.error = null; this.changed();
+    this.status = 'authenticating'; this.error = null; this.signIn = false; this.changed();
     try {
       await deadline(this.connection.authenticate({ methodId: method.id }), 180000, 'Sign-in timed out. Reconnect to try again.');
+      this.authStatus = null;
       if (generation === this.generation) await this.newSession(this.info?.agentCapabilities?.loadSession ? this.saved() : null);
-    } catch (error) { if (generation === this.generation) { this.status = 'error'; this.error = error.message; this.changed(); } }
+    } catch (error) {
+      if (generation !== this.generation) return;
+      if (error.code === AUTH_REQUIRED) return this.needSignIn();
+      this.halt(error.data?.details || error.message);
+    }
   }
   /** @param {{ prompt: string, id: string, sessionId: string, images?: { data: string, mimeType: string }[] }} message */
   send({ prompt, id, sessionId, images = [] }) {
@@ -387,12 +431,10 @@ export class AcpChat {
     if (typeof id !== 'string' || !id || id.length > 100) throw fail('Missing message ID', 400);
     if (this.requests.has(id)) {
       if (this.requests.get(id) !== prompt) throw fail('Message ID already used', 400);
-      if (this.pending.some(row => row.id === id && row.deliveryUnknown)) throw fail('This message has an unknown outcome. Review the conversation before sending it again.');
       return;
     }
     const asleep = this.status === 'asleep' || !!this.waking;
     if (!['ready', 'working'].includes(this.status) && !asleep) throw fail('Wait for the agent to connect');
-    if (this.pending.some(row => row.deliveryUnknown)) throw fail('A previous delivery has an unknown outcome. Review and remove that queued message before sending again.');
     // A sleeping agent hasn't said yet; it is asked again on delivery.
     if (images.length && this.info && !this.info.agentCapabilities?.promptCapabilities?.image) throw fail(`${this.name} does not accept images`, 400);
     const row = { id, role: 'user', text: prompt, at: Date.now(), state: 'queued', agent: this.agent, sessionId,
@@ -413,7 +455,6 @@ export class AcpChat {
   }
   // Start the oldest queued message. Called when a turn ends, or on send if the agent is idle.
   next() {
-    if (this.pending.some(row => row.deliveryUnknown)) { this.attachPending(); this.changed(); return; }
     const row = this.pending.find(r => r.state === 'queued');
     if (!row) return;
     if (this.status !== 'ready') return;
@@ -434,7 +475,8 @@ export class AcpChat {
     this.rows.push(row);
     row.state = 'delivered'; row.at = Date.now();
     // Agents save a conversation once it has a message, so only then is it worth resuming.
-    if (!this.history.some(s => s.id === sessionId && s.agent === this.agent)) {
+    const first = !this.history.some(s => s.id === sessionId && s.agent === this.agent);
+    if (first) {
       this.history = [{ id: sessionId, agent: this.agent, at: Date.now(), title: prompt.slice(0, 80) || 'Image' }, ...this.history].slice(0, 50);
     }
     // Journal intent before invoking the agent. Recovery treats this as uncertain,
@@ -442,12 +484,12 @@ export class AcpChat {
     try { this.save(); }
     catch (error) { row.state = 'queued'; this.error = `Message remains queued: ${error.message}`; this.changed(); return; }
     this.onActivity({ type: 'prompt', label: prompt.slice(0, 200) || `${images.length} image${images.length === 1 ? '' : 's'}` });
-    this.message = null; this.status = 'working'; this.error = null; this.changed();
+    this.message = null; this.status = 'working'; this.error = null; this.signIn = false; this.changed();
     const generation = this.generation;
     // A resumed conversation replays its earlier user turns, so it was primed already.
     const primed = !this.includeContext || this.agent === 'claude' || this.rows.some(r => r.role === 'user' && r.id !== id && r.state !== 'queued');
     const blocks = [...primed ? [] : [{ type: 'text', text: `<fireside-context>\n${CONTEXT}\n</fireside-context>\n\n` }], ...prompt ? [{ type: 'text', text: prompt }] : []];
-    let stopped = false, outcome = 'transport_error';
+    let stopped = false, failed = false, outcome = 'transport_error';
     const diagnostics = { key: randomUUID(), promptId: id, sessionId, agent: this.agent, agentPid: this.child?.pid ?? null, started: Date.now(), signals: new Set(), errors: new Set(), firstUpdate: false };
     this.diagnosticTurn = diagnostics;
     startTurn(this.root, this.agent, diagnostics.key);
@@ -468,14 +510,22 @@ export class AcpChat {
       catch (error) { this.pending.splice(index, 0, row); throw error; }
       row.state = stopped ? 'interrupted' : 'answered';
     }).catch(error => {
+      // Refused, not lost: it goes out by itself once the chat is signed in again.
+      if (error.code === AUTH_REQUIRED && generation === this.generation) {
+        outcome = 'auth_required'; row.state = 'queued'; this.sendOnReady = true;
+        if (first) this.history = this.history.filter(s => s.id !== sessionId);
+        try { this.save(); } catch {}
+        return this.needSignIn();
+      }
       outcome = 'transport_error';
       this.diagnostic('prompt_transport_error', { promptId: id, sessionId, agent: diagnostics.agent, agentPid: diagnostics.agentPid, ...errorSignal(error) });
       if (generation === this.generation) {
-        row.state = 'queued'; row.deliveryUnknown = true;
-        this.attachPending();
-        this.error = `${error.message}. ${this.error}`;
-        // If storage is unavailable, the earlier delivered record already makes
-        // the next recovery conservative.
+        // It counts as sent. Whatever came back is in the thread, and the user decides
+        // whether to send it again; nothing queued behind it goes out until then.
+        failed = true; row.state = 'interrupted';
+        this.pending.splice(this.pending.indexOf(row), 1);
+        // The SDK reports an agent's thrown error as "Internal error", with the words in `data`.
+        if (!this.connection.signal.aborted) this.error = error.data?.details || error.message;
         try { this.save(); } catch {}
       }
     }).finally(() => {
@@ -484,10 +534,10 @@ export class AcpChat {
       if (this.diagnosticTurn === diagnostics) this.diagnosticTurn = null;
       if (generation !== this.generation) return;
       this.cancelPermissions();
-      if (this.status === 'working') this.status = this.connection.signal.aborted ? 'error' : 'ready';
+      if (this.status === 'working' && !this.connection.signal.aborted) this.status = 'ready';
       this.message = null; this.remember(); this.changed();
       // Stop already handed the queue back; anything left waits for the next send.
-      if (this.status === 'ready' && !stopped) this.next();
+      if (this.status === 'ready' && !stopped && !failed) this.next();
     });
   }
   unqueue(id, sessionId) {
@@ -498,14 +548,13 @@ export class AcpChat {
     try { this.save(); }
     catch (error) { this.pending.splice(index, 0, row); throw error; }
     this.rows = this.rows.filter(r => r.id !== id);
-    if (!this.pending.some(r => r.deliveryUnknown)) { this.error = null; this.rows = this.rows.filter(r => r.id !== 'delivery-unknown'); }
     this.changed();
   }
   // Stop hands the waiting messages back to be edited and sent again, as Claude Code
   // and Codex do, rather than leaving them stuck behind a reply that will not come.
   release() {
     if (this.status !== 'working') return [];
-    const released = this.pending.filter(r => r.state === 'queued' && !r.deliveryUnknown);
+    const released = this.pending.filter(r => r.state === 'queued');
     if (!released.length) return [];
     const kept = this.pending;
     this.pending = kept.filter(r => !released.includes(r));
@@ -529,21 +578,22 @@ export class AcpChat {
       if (generation !== this.generation) return;
       await this.close();
       this.sessionId = sessionId;
-      for (const row of this.pending) if (row.state === 'delivered') { row.state = 'queued'; row.deliveryUnknown = true; }
-      this.status = 'error'; this.attachPending();
-      this.error = `${error.message}. The agent connection was closed. Reconnect to review the conversation; unfinished messages will not be replayed automatically.`;
-      try { this.save(); } catch (writeError) { this.error += ` Recovery could not be saved: ${writeError.message}`; }
-      this.changed();
+      this.pending = this.pending.filter(row => { if (row.state !== 'delivered') return true; row.state = 'interrupted'; return false; });
+      let message = `${error.message}. The agent connection was closed. Reconnect to continue.`;
+      try { this.save(); } catch (writeError) { message += ` Recovery could not be saved: ${writeError.message}`; }
+      this.halt(message);
     }
   }
   async clear(sessionId) {
     if (!sessionId || sessionId !== this.sessionId) throw fail('The conversation changed. Try again.');
+    // A chat whose agent won't come back can still start over.
+    if (this.status === 'asleep') { this.requireEmptyQueue(); return this.connect(this.agent); }
     if (!['ready', 'working'].includes(this.status)) throw fail('Connect to an agent first');
     await this.stop();
     this.requireEmptyQueue();
     this.status = 'resetting'; this.changed();
     try { await this.newSession(); }
-    catch (error) { this.status = 'error'; this.error = error.message; this.changed(); }
+    catch (error) { this.halt(error.data?.details || error.message); }
   }
   update({ sessionId, update: u }) {
     if (this.sessionId && sessionId !== this.sessionId) return;
@@ -669,12 +719,13 @@ export class AcpChat {
     if (this.child) this.diagnostic('agent_close_requested');
     ++this.generation; this.cancelPermissions();
     const child = this.child;
-    if (child) {
+    // One that already exited has no close event left to wait for.
+    if (child && child.exitCode === null && child.signalCode === null) {
       const kill = signal => { try { if (process.platform !== 'win32') process.kill(-child.pid, signal); else child.kill(signal); } catch {} };
       kill('SIGTERM');
       try { await deadline(new Promise(resolve => child.once('close', resolve)), 2000, 'timeout'); } catch { kill('SIGKILL'); }
     }
     this.child = null; this.connection = null; this.info = null; this.turn = null;
-    this.sessionId = null; this.status = 'disconnected'; this.commands = []; this.configOptions = []; this.error = null; this.usage = null;
+    this.sessionId = null; this.status = 'disconnected'; this.commands = []; this.configOptions = []; this.error = null; this.signIn = false; this.usage = null;
   }
 }

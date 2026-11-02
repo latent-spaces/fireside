@@ -2,5 +2,6 @@
   "name": "Codex",
   "npm": "@agentclientprotocol/codex-acp",
   "about": "The adapter Fireside runs your Codex chats through. It brings its own copy of Codex, and one that is too old is refused the newer models your Codex config may already name.",
+  "signIn": "codex login",
   "link": "https://github.com/agentclientprotocol/codex-acp"
 }

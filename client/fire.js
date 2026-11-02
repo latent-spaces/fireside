@@ -5,7 +5,6 @@
 
 const BUSY = ['connecting', 'resetting', 'authenticating', 'configuring'];
 const OPEN = ['ready', 'working', 'asleep'];
-const SIGN_IN = { claude: 'claude auth login', codex: 'codex login' };
 const BURN = 1700, QUICK_BURN = 800;   // long enough to see, however fast the agent answers
 const REVEAL = 1500;
 
@@ -80,15 +79,10 @@ export function lightFire({ store, request, machine, onDone }) {
       .finally(() => setTimeout(() => { fresh = false; sync(); }, failure ? 0 : 1500));
   }
 
-  // The agents' own sign-in state is only known for the two Usage can read.
-  const signedIn = (agent) => {
-    const row = store.subscriptions?.providers?.find((p) => p.name === agent.name);
-    return !!row?.windows?.length && !row.message;
-  };
   function drawAgents() {
     const list = store.acp?.agents || [];
     agents.replaceChildren(...list.map((agent) => {
-      const b = action('', () => connect(agent.id), `fire-agent agent-provider agent-provider-${SIGN_IN[agent.id] ? agent.id : 'other'}`);
+      const b = action('', () => connect(agent.id), `fire-agent agent-provider agent-provider-${agent.mark}`);
       if (agent.icon) {
         const img = node('img', 'agent-icon');
         img.src = agent.icon; img.alt = '';
@@ -96,7 +90,6 @@ export function lightFire({ store, request, machine, onDone }) {
       }
       const label = node('span', 'fire-agent-label');
       label.append(node('b', '', agent.name));
-      if (signedIn(agent)) label.append(node('small', '', 'Signed in, ready'));
       b.append(label);
       return b;
     }), (() => {
@@ -132,13 +125,15 @@ export function lightFire({ store, request, machine, onDone }) {
   }
 
   function embers() {
-    const acp = store.acp || {}, command = SIGN_IN[chosen || acp.agent];
+    const acp = store.acp || {};
     const methods = acp.status === 'error' ? acp.authMethods || [] : [];
     const agent = chosen || acp.agent;
-    const words = [`We couldn’t connect to ${nameOf(agent)}.`];
-    if (command) words.push(' If you’re not signed in, run ', node('code', '', command), ' in a terminal, then try again.');
-    show('embers', 'The fire didn’t catch.', words, {
-      fine: failure || acp.error || '',
+    const command = acp.agents?.find((a) => a.id === agent)?.signIn;
+    const words = !acp.signIn ? `We couldn’t connect to ${nameOf(agent)}.`
+      : command ? ['Run ', node('code', '', command), ' in a terminal, then try again.']
+      : `${nameOf(agent)} signs in its own way. Follow its instructions, then try again.`;
+    show('embers', acp.signIn ? `Sign in to ${nameOf(agent)}.` : 'The fire didn’t catch.', words, {
+      fine: failure || (acp.signIn ? '' : acp.error || ''),
       sig: methods.map((m) => m.id).join(),
       buttons: () => [
         ...methods.map((m) => action(`Sign in with ${m.name}`, () => signIn(m.id), 'fire-primary')),
@@ -156,7 +151,7 @@ export function lightFire({ store, request, machine, onDone }) {
     if (fresh) return burn();
     if (!picking && (failure || (acp.agent && acp.error))) return embers();
     show('dark', 'Who’s joining you by the fire?', 'Pick an agent. It can work on this project, and change this desk while you talk.', {
-      sig: JSON.stringify([acp.agents, store.subscriptions?.providers?.map((p) => [p.name, p.windows?.length, p.message])]),
+      sig: JSON.stringify(acp.agents),
     });
   }
 

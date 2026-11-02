@@ -9,7 +9,6 @@ let current;
 // Which agents exist is the server's to say (src/agents.mjs): the two built in,
 // plus any the user added from the ACP registry or by command.
 export const agentName = state => state?.agents?.find(a => a.id === state.agent)?.name || null;
-const SIGN_IN = { claude: 'claude auth login', codex: 'codex login' };
 const node = (tag, text, cls) => { const n = document.createElement(tag); if (text) n.textContent = text; if (cls) n.className = cls; return n; };
 const button = (text, action, cls) => { const b = node('button', text, cls); b.type = 'button'; b.onclick = action; return b; };
 const option = (value, name) => { const o = node('option', name); o.value = value; return o; };
@@ -155,26 +154,20 @@ export function agentControls(request, input, note, otherChats, onDispose) {
   const error = node('p', '', 'agent-error'); error.setAttribute('role', 'alert');
   const recovery = node('div', '', 'agent-recovery');
   const login = node('div', '', 'agent-sign-in');
-  const retry = button('Try again', () => {
-    const resume = current.preferred?.agent === current.agent && current.sessions?.some(s => s.id === current.preferred.sessionId && s.agent === current.agent);
-    return run('connect', { agent: current.agent, ...(resume ? { resume: current.preferred.sessionId } : {}) });
+  const signInHint = node('div', '', 'agent-sign-in-hint');
+  const signInWords = node('p'), signInRow = node('div', '', 'agent-command');
+  const signInCommand = node('code'), signInLink = link('How to sign in', '');
+  const copyCommand = button('Copy', async () => {
+    await navigator.clipboard.writeText(signInCommand.textContent);
+    copyCommand.textContent = 'Copied'; setTimeout(() => { copyCommand.textContent = 'Copy'; }, 1500);
   });
-  const fresh = button('Start a new conversation', () => run('connect', { agent: current.agent }), 'agent-text-button');
-  recovery.append(login, retry, fresh);
+  signInRow.append(signInCommand, copyCommand); signInHint.append(signInWords, signInRow, signInLink, login);
+  const retry = button('Try again', () => (current.sessionId ? run('wake') : run('connect', { agent: current.agent })));
+  recovery.append(signInHint, retry);
   const cancel = button('Cancel', () => run('cancel'), 'agent-text-button');
   const reassurance = node('p', 'Already signed in on this computer? We’ll use that login.', 'agent-reassurance');
-  const help = details('Need help signing in?', 'agent-help');
-  for (const [id, command] of Object.entries(SIGN_IN)) {
-    const section = node('div', '', 'agent-login-help'); section.dataset.agent = id;
-    section.append(node('strong', id === 'claude' ? 'Claude' : 'Codex'), node('p', 'In your terminal, run:'), node('code', command), node('p', 'Finish signing in, then return here and continue.'));
-    help.append(section);
-  }
-  // Any other agent signs in its own way; say so, and point to where it says how.
-  const otherHelp = node('div', '', 'agent-login-help'); otherHelp.dataset.agent = '*';
-  help.append(otherHelp);
-  const api = details('Use an API key', 'agent-advanced');
-  api.append(node('p', 'Start Fireside with ANTHROPIC_API_KEY for Claude or OPENAI_API_KEY for Codex set in its environment. Your agent manages credentials and billing.'));
-  help.append(api);
+  const help = details('Use an API key', 'agent-help');
+  help.append(node('p', 'Start Fireside with ANTHROPIC_API_KEY for Claude or OPENAI_API_KEY for Codex set in its environment. Your agent manages credentials and billing.'));
   card.append(brand, heading, intro, providers, reassurance, help);
 
   const toolbar = node('div', '', 'agent-toolbar');
@@ -218,7 +211,7 @@ export function agentControls(request, input, note, otherChats, onDispose) {
   const questions = node('div', '', 'agent-ask-dock');
   const sheet = addSheet(request, connect);
   host.append(card, toolbar, status, error, recovery, cancel, permissions, questions, sheet.root);
-  Object.assign(m, { card, heading, intro, providers, providerList, providerButtons: [], more, typed, otherHelp, connect, request, switchList, addAgent, reassurance, help, toolbar, picker, summary, switches: [], model, modelLabel, modelHint, effort, effortLabel, effortHint, settings, status, error, recovery, login, retry, fresh, cancel, history, sessions, resume, commands, commandList, disconnect, clear, stop, permissions, questions, run });
+  Object.assign(m, { card, heading, intro, providers, providerList, providerButtons: [], more, typed, connect, request, switchList, addAgent, reassurance, help, toolbar, picker, summary, switches: [], model, modelLabel, modelHint, effort, effortLabel, effortHint, settings, status, error, recovery, signInHint, signInWords, signInRow, signInCommand, signInLink, login, retry, cancel, history, sessions, resume, commands, commandList, disconnect, clear, stop, permissions, questions, run });
   host.addEventListener('keydown', e => { if (e.key === 'Escape' && picker.open) { picker.open = false; summary.focus(); e.stopPropagation(); } });
   mounts.add(m);
   onDispose(() => mounts.delete(m));
@@ -235,7 +228,7 @@ function drawAgents(m, state) {
   const list = state?.agents || [];
   if (!changed(m.providerList, list)) return;
   m.providerButtons = list.map(a => {
-    const b = button('', () => m.connect(a.id), `agent-provider agent-provider-${SIGN_IN[a.id] ? a.id : 'other'}`);
+    const b = button('', () => m.connect(a.id), `agent-provider agent-provider-${a.mark}`);
     if (a.icon) { const img = node('img', '', 'agent-icon'); img.src = a.icon; img.alt = ''; b.append(img); b.classList.add('has-icon'); }
     b.append(node('span', `Continue with ${a.name}`));
     b.dataset.agent = a.id; removable(m, b, a); return b;
@@ -367,8 +360,8 @@ export function updateAgentControls(state) {
     m.help.hidden = busy;
     // A tab opened beside a running chat is not a first sign-in.
     const another = !connected && m.otherChats();
-    m.heading.textContent = state?.status === 'authenticating' ? 'Finish signing in.' : busy ? `Connecting to ${name}…` : state?.error ? 'Let’s reconnect.' : another ? 'Open another chat.' : 'Pick an agent to start chatting.';
-    m.intro.textContent = state?.status === 'authenticating' ? 'Complete sign-in in your browser. Your chat will open here automatically.' : busy ? 'Your chat will open once the connection is ready.' : state?.error ? `We couldn’t connect to ${name}. Try again or choose another agent.` : another ? 'Choose the agent for this chat. It runs alongside the chats you already have open, on the same project.' : 'It can work on this project, and change this desk while you talk.';
+    m.heading.textContent = state?.status === 'authenticating' ? 'Finish signing in.' : state?.signIn ? `Sign in to ${name}.` : busy ? `Connecting to ${name}…` : state?.error ? 'Let’s reconnect.' : another ? 'Open another chat.' : 'Pick an agent to start chatting.';
+    m.intro.textContent = state?.status === 'authenticating' ? 'Complete sign-in in your browser. Your chat will open here automatically.' : state?.signIn ? 'You’re not signed in yet.' : busy ? 'Your chat will open once the connection is ready.' : state?.error ? `We couldn’t connect to ${name}. Try again or choose another agent.` : another ? 'Choose the agent for this chat. It runs alongside the chats you already have open, on the same project.' : 'It can work on this project, and change this desk while you talk.';
     m.more.disabled = m.typed.disabled = m.addAgent.disabled = busy || working;
     for (const b of m.providerButtons) b.disabled = busy || working;
     for (const b of m.switches) { b.disabled = busy || working; b.setAttribute('aria-pressed', String(b.dataset.agent === state?.agent)); }
@@ -406,32 +399,35 @@ export function updateAgentControls(state) {
     m.clear.hidden = !connected; m.clear.disabled = busy;
     m.stop.hidden = !working; m.stop.disabled = m.pending;
     const labels = { asleep: 'Asleep · wakes when you send', connecting: 'Connecting…', resetting: 'Starting a new conversation…', authenticating: 'Waiting for sign-in…', configuring: 'Changing settings…', working: 'Working…' };
-    m.status.textContent = labels[state?.status] || ''; m.status.hidden = !m.status.textContent;
+    m.status.textContent = (!state?.error && !state?.waking && labels[state?.status]) || ''; m.status.hidden = !m.status.textContent;
     // Once a chat is open, the status shares the line with its token usage.
     const usageBar = mode !== 'setup' && chat?.querySelector('[data-chat-usage]');
     if (usageBar) usageBar.dataset.status = state?.status || '';
     if (usageBar && m.status.parentNode !== usageBar) usageBar.prepend(m.status);
     else if (!usageBar && m.status.parentNode !== m.host) m.toolbar.after(m.status);
     const error = m.localError || state?.error || '';
-    m.error.textContent = error; m.error.hidden = !error;
-    m.recovery.hidden = !active || connected || !error || busy;
-    const methods = state?.status === 'error' ? state?.authMethods || [] : [];
+    m.error.textContent = error; m.error.hidden = !error || (state?.signIn && !connected);   // the heading says it
+    // A live chat just shows its error; one that stopped can be started again.
+    m.recovery.hidden = !active || !error || busy || (connected && state?.status !== 'asleep');
+    // What to run sits by the way back: Reconnect in a chat, the agents on the picker.
+    m.signInHint.hidden = !state?.signIn;
+    if (connected && m.signInHint.parentNode !== m.recovery) m.recovery.prepend(m.signInHint);
+    else if (!connected && m.signInHint.parentNode !== m.card) m.intro.after(m.signInHint);
+    const own = state?.agents?.find(a => a.id === state.agent), command = own?.signIn, next = connected ? 'reconnect' : `continue with ${name}`;
+    m.signInWords.textContent = command ? `Run this in a terminal, then ${next}:` : `${name} signs in its own way. Follow its instructions, then ${next}.`;
+    m.signInCommand.textContent = command || ''; m.signInRow.hidden = !command;
+    m.signInLink.hidden = !!command || !own?.link; m.signInLink.href = own?.link || '';
+    // In a chat it brings the agent back to the thread; it doesn't resend anything.
+    m.retry.textContent = connected ? 'Reconnect' : 'Try again';
+    const methods = state?.signIn ? state?.authMethods || [] : [];
     if (changed(m.login, methods)) {
       m.login.replaceChildren(...methods.map(a => { const b = button(`Sign in with ${a.name}`, () => m.run('authenticate', { methodId: a.id }), 'agent-primary'); b.title = a.description; return b; }));
     }
     m.login.hidden = !methods.length;
     for (const b of m.login.children) b.disabled = busy;
-    m.retry.disabled = busy; m.fresh.hidden = !state?.preferred || state.preferred.agent !== state.agent;
+    m.retry.disabled = busy || !!state?.waking;
     m.cancel.hidden = !['connecting', 'authenticating'].includes(state?.status); m.cancel.disabled = m.pending;
     m.disconnect.hidden = !active; m.disconnect.disabled = busy || working;
-    if (state?.error && state.agent === 'claude' && m.lastError !== state.error) m.help.open = true;
-    m.lastError = state?.error;
-    const own = state?.agent && !SIGN_IN[state.agent] ? state.agents?.find(a => a.id === state.agent) : null;
-    if (changed(m.otherHelp, own)) m.otherHelp.replaceChildren(...own ? [node('strong', own.name), node('p', `${own.name} signs in its own way. Follow its instructions, then return here and try again.`),
-      ...own.link ? [link('How to sign in', own.link)] : []] : []);
-    for (const section of m.help.querySelectorAll('.agent-login-help')) {
-      section.hidden = section.dataset.agent === '*' ? !own || !state?.error : !!state?.error && section.dataset.agent !== state.agent;
-    }
     const saved = state?.sessions || [];
     m.history.hidden = !saved.length;
     if (changed(m.sessions, saved)) {

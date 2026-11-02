@@ -175,7 +175,7 @@ export class ChatTabs {
   /** What the tab strip shows: enough to name each chat and say how it is doing. */
   view() {
     const rows = this.tabs.map((tab) => {
-      const { agent, sessionId, status, error } = tab.acp;
+      const { agent, sessionId, status, error } = tab.acp.held?.view || tab.acp;
       return {
         id: tab.id, agent: agent || null, name: agent ? tab.acp.name : 'New chat',
         title: this.sessions.find((s) => s.id === sessionId)?.title || null,

@@ -105,7 +105,7 @@ export function createChatRoutes({ ROOT, tabs, record, pushAcp, pushState, agent
       (async () => {
         // A sleeping chat's settings belong to its agent: wake it, then apply them.
         let sessionId = input.sessionId;
-        if (asleep && ['model', 'effort', 'setting', 'clear'].includes(action)) { await acp.wake(); sessionId = acp.sessionId; }
+        if (asleep && ['model', 'effort', 'setting'].includes(action)) { await acp.wake(); sessionId = acp.sessionId; }
         if (action === 'connect') {
           await acp.connect(input.agent, input.resume || null);
         } else if (action === 'close') {

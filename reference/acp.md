@@ -24,7 +24,9 @@ skipped, so a cloned repository cannot change what "Claude" runs.
 Fireside's own `node_modules` for a built-in); the exact version is pinned in that
 folder's `package.json`. `command` runs a program on PATH, or under `<id>/` when it
 starts with `./`. Optional fields: `args`, `env`, `about`, `link`, `icon` (an SVG
-beside the file), and `from` (where it came from, used by updates).
+beside the file), `signIn` (the command that signs in, shown when the agent needs
+it; without one the chat points to `link`), and `from` (where it came from, used
+by updates).
 
 The ACP registry is read only when the user opens **More agents…**, and once more
 to install the picked entry. Picking one writes a file like the above: npm entries
@@ -40,7 +42,23 @@ only if it completes the ACP `initialize` handshake, and names it after the
 Every agent gets the same connection. The desk instructions ride in a hidden
 primer ahead of the first message; only Claude takes them as a system prompt
 extension instead. Sign-in buttons are drawn from the agent's own `authMethods`
-(agent-handled methods without `_meta`). Codex's question-form quirks and the
+(agent-handled methods without `_meta`).
+
+A session does not prove a login: Codex refuses one signed out, but Claude opens
+one and only refuses the first message. So a chat asks for sign-in on ACP's
+`authRequired` error from any call, or when `_auth/status_update` reports `none`,
+and an agent that declares that extension is not called ready until its first
+report arrives or six seconds pass. Terminal auth methods are not used; the chat
+and the first-run screen say which command to run.
+
+Every failure goes through `AcpChat.halt`, so they all look the same. A chat with a
+conversation stays on it, asleep, with the error beside the thread: sending or
+Reconnect restarts the agent. A chat with nothing to keep goes back to the agent picker.
+A lost sign-in is one of these failures, plus the command that fixes it. A message
+refused for sign-in was never delivered, so it stays queued and goes out once the
+chat is back.
+
+Codex's question-form quirks and the
 Usage window's plan limits stay specific to those two agents.
 
 `src/updates.mjs` watches every agent in the built-in and user layers that Fireside
@@ -75,11 +93,16 @@ before calling the agent. Pending work is separate from the 400-row display
 history and is never trimmed with it. A failed write rejects acceptance or leaves
 the message queued, rather than pretending it was delivered.
 
+A message that was sent counts as sent, however its turn ended. ACP has no receipt,
+so Fireside cannot tell how far a failed turn got. It shows the error, never replays
+the message by itself, and leaves the user to send it again if the thread shows it
+didn't finish. Messages queued behind a failed one wait for the user's next send, so
+they don't run on top of unfinished work. Only `authRequired` is certain to have done
+nothing: that message stays queued and goes out after sign-in.
+
 After a restart, unsent messages remain queued for the same conversation until
-the user sends another message. A prompt that was in flight, or whose response
-was lost, has an unknown outcome: its text is retained with an explanation, and
-delivery is blocked until the user reviews the conversation and removes that
-entry using the existing queue control. Fireside never automatically replays it.
+the user sends another message. One that was on its way counts as sent, and the chat
+says the last reply was cut off.
 Request deduplication stays in memory. Pending IDs are recovered from the saved
 queue; completed request IDs do not survive a server restart.
 The pending queue must be resolved before changing providers, starting a new
@@ -99,8 +122,7 @@ Clear cancels the active prompt, rejects unresolved permissions, and calls
 `session/new`. It does not delete the old transcript. Resume checks `loadSession`
 before invoking `session/load` and accepts its replay. Stop bounds both the cancel
 notification and the active turn to ten seconds; on failure it closes the adapter
-process, fences late events, and retains the unfinished prompt as uncertain for
-review after reconnecting. A conversation joins the
+process and fences late events. A conversation joins the
 resume list with its first sent message, since agents only save it then; one the
 agent reports as not found is dropped from the list. Server startup attempts to
 restore saved conversations. Restoring a session

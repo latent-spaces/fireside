@@ -455,7 +455,7 @@ body.resizing .win iframe,body.moving .win iframe{pointer-events:none}
 .fire-mascot{position:absolute;left:0;bottom:0}
 .fire-title{margin:0 0 6px;font-family:var(--round);font-weight:700;font-size:clamp(23px,3.2vw,31px);line-height:1.15;letter-spacing:-.015em;text-wrap:balance;outline:none}
 .fire-text{margin:0 0 18px;max-width:46ch;font-size:14px;line-height:1.45;color:#cdbfb0;text-wrap:pretty}
-.fire-text code{font-family:var(--mono);font-size:12.5px;padding:2px 6px;border-radius:6px;background:#00000040;color:#ffe3a1}
+.fire-text code{font-family:var(--mono);font-size:12.5px;padding:2px 6px;border-radius:6px;background:#00000040;color:#ffe3a1;user-select:all}
 .fire-detail{margin:-10px 0 18px;max-width:60ch;font-size:12px;color:#a8998c;overflow-wrap:anywhere}
 .fire-agents,.fire-acts{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
 .fire-agents:empty,.fire-acts:empty{display:none}

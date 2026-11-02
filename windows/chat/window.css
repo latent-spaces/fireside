@@ -116,17 +116,23 @@
 .agent-add pre.agent-error{white-space:pre-wrap;font:12px/1.5 var(--mono)}
 .agent-add a{color:inherit;text-underline-offset:3px}
 .agent-reassurance{font-size:12px;line-height:1.6;color:var(--ink-2);margin:17px 0 20px}
-.agent-help,.agent-advanced,.agent-history,.agent-commands{font-size:12px;line-height:1.5;color:var(--ink-2)}
+.agent-help,.agent-history,.agent-commands{font-size:12px;line-height:1.5;color:var(--ink-2)}
 .agent-controls summary{cursor:pointer;min-height:30px;padding:5px 0}
 .agent-help{margin-top:16px}
-.agent-login-help{margin:14px 0 18px}
-.agent-login-help p{margin:7px 0}
-.agent-login-help code{display:block;font:12px/1.5 var(--mono);padding:10px 12px;border-radius:7px;background:var(--sunk);color:var(--ink);user-select:all}
 .agent-controls .agent-text-button{background:none;border:0;font-size:12px;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;padding:6px 0;min-height:32px}
 .agent-login>.agent-text-button{margin-top:12px}
 .agent-status{color:var(--ink-2);font-size:12px;line-height:1.5;margin:8px 0 0}
 .agent-controls[data-mode=setup]>.agent-status{max-width:330px;margin:16px auto 0}
-.agent-error{font-size:12px;color:var(--ink);background:var(--sunk);padding:12px;border-radius:8px;line-height:1.5;overflow-wrap:anywhere;margin:12px auto 0;max-width:330px}
+.agent-error{font-size:13px;font-weight:550;color:var(--ink);background:color-mix(in srgb,var(--sun) 26%,var(--surface));border:1px solid color-mix(in srgb,var(--sun) 65%,var(--surface));padding:12px;border-radius:8px;line-height:1.5;overflow-wrap:anywhere;margin:12px auto 0;max-width:330px}
+.agent-sign-in-hint{margin:0 0 4px}
+.agent-sign-in-hint p{margin:0 0 7px;font-size:13px;line-height:1.5;color:var(--ink)}
+.agent-login>.agent-sign-in-hint{margin:-10px 0 20px}
+.agent-sign-in-hint a{color:inherit;font-size:13px;text-underline-offset:3px}
+.agent-sign-in-hint .agent-sign-in{margin-top:8px}
+.agent-command{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-radius:8px;background:var(--sunk)}
+.agent-command[hidden]{display:none}
+.agent-command code{flex:1;min-width:0;font:13px/1.5 var(--mono);font-weight:600;color:var(--ink);user-select:all;overflow-wrap:anywhere}
+.agent-controls .agent-command button{flex:none;min-height:28px;padding:3px 10px;font-size:12px}
 .agent-recovery{max-width:330px;margin:12px auto 0;display:grid;gap:8px}
 .agent-controls .agent-primary{background:var(--ink);color:var(--surface);border-color:transparent;font-weight:650}
 .agent-controls .agent-primary:hover:not(:disabled){background:var(--ink-2);color:var(--surface)}

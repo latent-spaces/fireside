@@ -2,5 +2,6 @@
   "name": "Claude",
   "npm": "@agentclientprotocol/claude-agent-acp",
   "about": "The adapter Fireside runs your Claude chats through. It bundles its own copy of Claude Code, so a newer one can offer models your account already has.",
+  "signIn": "claude auth login",
   "link": "https://github.com/agentclientprotocol/claude-agent-acp"
 }

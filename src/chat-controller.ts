@@ -64,10 +64,10 @@ export function createChatController(ROOT: string, broadcast: (event: string, da
   }
   /** The menu bar names the chat you are watching, and says who else is working. */
   function agentStatus() {
-    if (!tabs.live) return;
     const chat = active();
+    if (!tabs.live || chat.waking) return;
     const elsewhere = tabs.tabs.filter((tab) => tab.id !== tabs.activeId && tab.acp.status === 'working').map((tab) => tab.acp.agent);
-    const label = chat.agent ? `${chat.agent} · ${chat.status}` : 'new chat';
+    const label = chat.agent ? `${chat.agent} · ${chat.signIn ? 'not signed in' : chat.error ? 'error' : chat.status}` : 'new chat';
     const tone = chat.status === 'working' || elsewhere.length ? 'busy' : chat.error ? 'attention' : 'idle';
     setStatus(elsewhere.length ? `${label} · ${elsewhere.join(', ')} working` : label, tone);
   }

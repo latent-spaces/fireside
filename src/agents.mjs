@@ -56,6 +56,7 @@ function readAgent(dir, file, layer) {
     name: raw.name.trim().slice(0, 60), about: typeof raw.about === 'string' ? raw.about : '',
     npm: raw.npm, command: raw.command, args: raw.args || [], env: raw.env || {},
     link: https(raw.link) ? raw.link : null,
+    signIn: typeof raw.signIn === 'string' ? raw.signIn : null,
     icon: typeof raw.icon === 'string' ? raw.icon : null,
     from: raw.from && typeof raw.from === 'object' ? raw.from : null,
     raw,
@@ -82,7 +83,7 @@ function scan(dirs) {
 }
 
 /** @typedef {{ id: string, layer: string, file: string, home: string, name: string, about: string, npm?: string, command?: string,
- *   args: string[], env: Record<string, string>, link: string | null, icon: string | null, from: Record<string, any> | null, raw: Record<string, any> }} Agent */
+ *   args: string[], env: Record<string, string>, link: string | null, signIn: string | null, icon: string | null, from: Record<string, any> | null, raw: Record<string, any> }} Agent */
 /** @type {{ key: string, at: number, list: Agent[] }} */
 let cache = { key: '', at: 0, list: [] };
 /** Every agent this project can use, built-ins first. Cached briefly: the chat view asks often. */
@@ -112,7 +113,9 @@ function iconURL(agent) {
 
 /** What the chat window draws. */
 export function view(root) {
-  return list(root).map((a) => ({ id: a.id, name: a.name, icon: iconURL(a), link: a.link, removable: a.layer === 'user' }));
+  return list(root).map((a) => ({ id: a.id, name: a.name, icon: iconURL(a), link: a.link, signIn: a.signIn, removable: a.layer === 'user',
+    // Claude and Codex have marks of their own in the stylesheet.
+    mark: a.layer === 'built-in' && a.signIn ? a.id : 'other' }));
 }
 
 /** An npm package as resolved from `home`, the way Node would load it: its package.json and what it says. */
