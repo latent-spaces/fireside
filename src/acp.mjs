@@ -98,7 +98,9 @@ export class AcpChat {
     const waiting = pending.filter(row => row.state !== 'delivered' && !row.deliveryUnknown);
     this.pending = waiting.map(row => ({ ...row, state: 'queued' }));
     if (waiting.length < pending.length) this.error = 'The last reply was cut off. Send your message again if it didn’t finish.';
-    this.rows = [...this.pending];
+    // It stays in the thread, since neither the transcript nor the agent is sure to have it.
+    const cutOff = pending.filter(row => !waiting.includes(row)).map(row => ({ ...row, state: 'interrupted' }));
+    this.rows = [...cutOff, ...this.pending];
     this.permissions = new Map();
     this.questions = new Map();
     this.requests = new Map();
@@ -244,8 +246,10 @@ export class AcpChat {
       const result = await deadline(this.connection.setSessionConfigOption({ sessionId, configId: option.id, value }), 25000, `${option.name || label} change timed out. Reconnect to check the current setting.`);
       if (generation !== this.generation) return;
       this.configOptions = result.configOptions;
-    } catch (error) { if (generation === this.generation) this.error = error.message; }
-    finally { if (generation === this.generation) { this.status = 'ready'; this.changed(); } }
+    } catch (error) {
+      if (generation === this.generation && error.code === AUTH_REQUIRED) return this.needSignIn();
+      if (generation === this.generation) this.error = error.message;
+    } finally { if (generation === this.generation && this.status === 'configuring') { this.status = 'ready'; this.changed(); } }
   }
   // The last conversation, if it can be loaded. One that never got a message was never saved by the agent.
   saved(agent = this.agent) {
@@ -266,7 +270,7 @@ export class AcpChat {
     if (match ? saved.canLoad === false : !blank) return false;
     this.agent = previous.agent;
     this.sessionId = match ? saved.sessionId : this.saved(previous.agent);
-    if (match) Object.assign(this, { rows: saved.rows || [], configOptions: saved.configOptions || [], commands: saved.commands || [], lastUsage: saved.usage ? { sessionId: saved.sessionId, usage: saved.usage } : null });
+    if (match) Object.assign(this, { rows: [...saved.rows || [], ...this.rows.filter(row => row.state === 'interrupted')], configOptions: saved.configOptions || [], commands: saved.commands || [], lastUsage: saved.usage ? { sessionId: saved.sessionId, usage: saved.usage } : null });
     this.attachPending();
     this.status = 'asleep';
     return true;
@@ -291,7 +295,7 @@ export class AcpChat {
     this.held = { view: this.view(), usage: this.usageView(), rows };
     this.waking = this.connect(this.agent, this.sessionId, { restoring: true }).then(() => {
       // A wake that failed keeps the thread on screen beside its error.
-      if (this.status !== 'ready') { Object.assign(this, { rows, configOptions, commands }); this.attachPending(); }
+      if (!['ready', 'working'].includes(this.status)) { Object.assign(this, { rows, configOptions, commands }); this.attachPending(); }
       // An agent that can't resume starts over, but the thread is still the user's.
       else if (!this.info?.agentCapabilities?.loadSession) { this.rows = rows; this.attachPending(); }
       // The agent's replay may not have a turn that died, and the user may want to send it again.
@@ -595,7 +599,10 @@ export class AcpChat {
     this.requireEmptyQueue();
     this.status = 'resetting'; this.changed();
     try { await this.newSession(); }
-    catch (error) { this.halt(error.data?.details || error.message); }
+    catch (error) {
+      if (error.code === AUTH_REQUIRED) return this.needSignIn();
+      this.halt(error.data?.details || error.message);
+    }
   }
   update({ sessionId, update: u }) {
     if (this.sessionId && sessionId !== this.sessionId) return;
