@@ -12,8 +12,8 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@agentclientprotocol/claude-agent-acp": "0.94.0",
-    "@agentclientprotocol/codex-acp": "2.2.2",
+    "@agentclientprotocol/claude-agent-acp": "0.100.0",
+    "@agentclientprotocol/codex-acp": "2.5.0",
     "@agentclientprotocol/sdk": "1.4.0",
     "fflate": "0.8.3",
     "vite": "8.3.2"
