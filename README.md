@@ -46,15 +46,15 @@ Try asking:
 <details>
 <summary>Other agents and sign-in</summary>
 
-**Using another agent?** Choose **More agents…** to pick one from the
+**Using another agent?** Choose **Add another agent…** to pick one from the
 [ACP registry](https://agentclientprotocol.com/registry) (such as Gemini CLI,
 OpenCode, goose and Copilot), or **Run a command…** to add any program that speaks
 the [Agent Client Protocol](https://agentclientprotocol.com). Fireside says what it
 will download and run, and asks before it does. Right-click an agent you added to
 remove it.
 
-> **Claude or Codex not signed in yet?** Run `claude auth login` or `codex login`, or set
-> `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`.
+> **Claude or Codex not signed in yet?** Fireside offers to sign you in through your
+> browser. You can also set `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`.
 
 </details>
 

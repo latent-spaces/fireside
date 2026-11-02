@@ -142,14 +142,12 @@ export function agentControls(request, input, note, otherChats, onDispose) {
     return run('connect', { agent });
   };
   const card = node('section', '', 'agent-login');
-  const brand = node('div', 'fireside', 'agent-wordmark');
   const heading = node('h2', 'Pick an agent to start chatting.');
   const intro = node('p', 'It can work on this project, and change this desk while you talk.', 'agent-intro');
   const providers = node('div', '', 'agent-providers');
   const providerList = node('div', '', 'agent-provider-list');
-  const more = button('More agents…', () => sheet.open('list'), 'agent-provider agent-provider-more');
-  const typed = button('Run a command…', () => sheet.open('command'), 'agent-text-button');
-  providers.append(providerList, more, typed);
+  const more = button('Add another agent…', () => sheet.open('list'), 'agent-text-button agent-add-more');
+  providers.append(providerList, more);
   const status = node('p', '', 'agent-status'); status.setAttribute('role', 'status');
   const error = node('p', '', 'agent-error'); error.setAttribute('role', 'alert');
   const recovery = node('div', '', 'agent-recovery');
@@ -161,14 +159,13 @@ export function agentControls(request, input, note, otherChats, onDispose) {
     await navigator.clipboard.writeText(signInCommand.textContent);
     copyCommand.textContent = 'Copied'; setTimeout(() => { copyCommand.textContent = 'Copy'; }, 1500);
   });
-  signInRow.append(signInCommand, copyCommand); signInHint.append(signInWords, signInRow, signInLink, login);
+  const help = details('Use an API key', 'agent-help');
+  help.append(node('p', 'Start Fireside with ANTHROPIC_API_KEY for Claude or OPENAI_API_KEY for Codex set in its environment. Your agent manages credentials and billing.'));
+  signInRow.append(signInCommand, copyCommand); signInHint.append(signInWords, signInRow, signInLink, login, help);
   const retry = button('Try again', () => (current.sessionId ? run('wake') : run('connect', { agent: current.agent })));
   recovery.append(signInHint, retry);
   const cancel = button('Cancel', () => run('cancel'), 'agent-text-button');
-  const reassurance = node('p', 'Already signed in on this computer? We’ll use that login.', 'agent-reassurance');
-  const help = details('Use an API key', 'agent-help');
-  help.append(node('p', 'Start Fireside with ANTHROPIC_API_KEY for Claude or OPENAI_API_KEY for Codex set in its environment. Your agent manages credentials and billing.'));
-  card.append(brand, heading, intro, providers, reassurance, help);
+  card.append(heading, intro, providers);
 
   const toolbar = node('div', '', 'agent-toolbar');
   const picker = details('Choose an agent', 'agent-picker');
@@ -211,7 +208,7 @@ export function agentControls(request, input, note, otherChats, onDispose) {
   const questions = node('div', '', 'agent-ask-dock');
   const sheet = addSheet(request, connect);
   host.append(card, toolbar, status, error, recovery, cancel, permissions, questions, sheet.root);
-  Object.assign(m, { card, heading, intro, providers, providerList, providerButtons: [], more, typed, connect, request, switchList, addAgent, reassurance, help, toolbar, picker, summary, switches: [], model, modelLabel, modelHint, effort, effortLabel, effortHint, settings, status, error, recovery, signInHint, signInWords, signInRow, signInCommand, signInLink, login, retry, cancel, history, sessions, resume, commands, commandList, disconnect, clear, stop, permissions, questions, run });
+  Object.assign(m, { card, heading, intro, providers, providerList, providerButtons: [], more, connect, request, switchList, addAgent, help, toolbar, picker, summary, switches: [], model, modelLabel, modelHint, effort, effortLabel, effortHint, settings, status, error, recovery, signInHint, signInWords, signInRow, signInCommand, signInLink, login, retry, cancel, history, sessions, resume, commands, commandList, disconnect, clear, stop, permissions, questions, run });
   host.addEventListener('keydown', e => { if (e.key === 'Escape' && picker.open) { picker.open = false; summary.focus(); e.stopPropagation(); } });
   mounts.add(m);
   onDispose(() => mounts.delete(m));
@@ -255,7 +252,7 @@ function removable(m, b, a) {
   };
 }
 
-// "More agents…" and "Run a command…": one sheet over the chat. The list is the
+// "Add another agent…" and "Run a command…": one sheet over the chat. The list is the
 // ACP registry, read when the sheet opens; picking one says plainly what will
 // be downloaded and run before anything is. A command the user types is tried
 // first and kept only if it answers as an ACP agent.
@@ -356,13 +353,12 @@ export function updateAgentControls(state) {
     m.host.dataset.mode = mode;
     chat?.setAttribute('data-connection', mode);
     m.card.hidden = connected; m.toolbar.hidden = !connected;
-    m.providers.hidden = busy; m.reassurance.hidden = busy || !!state?.error;
-    m.help.hidden = busy;
+    m.providers.hidden = busy;
     // A tab opened beside a running chat is not a first sign-in.
     const another = !connected && m.otherChats();
     m.heading.textContent = state?.status === 'authenticating' ? 'Finish signing in.' : state?.signIn ? `Sign in to ${name}.` : busy ? `Connecting to ${name}…` : state?.error ? 'Let’s reconnect.' : another ? 'Open another chat.' : 'Pick an agent to start chatting.';
     m.intro.textContent = state?.status === 'authenticating' ? 'Complete sign-in in your browser. Your chat will open here automatically.' : state?.signIn ? 'You’re not signed in yet.' : busy ? 'Your chat will open once the connection is ready.' : state?.error ? `We couldn’t connect to ${name}. Try again or choose another agent.` : another ? 'Choose the agent for this chat. It runs alongside the chats you already have open, on the same project.' : 'It can work on this project, and change this desk while you talk.';
-    m.more.disabled = m.typed.disabled = m.addAgent.disabled = busy || working;
+    m.more.disabled = m.addAgent.disabled = busy || working;
     for (const b of m.providerButtons) b.disabled = busy || working;
     for (const b of m.switches) { b.disabled = busy || working; b.setAttribute('aria-pressed', String(b.dataset.agent === state?.agent)); }
     const model = state?.model;
@@ -413,13 +409,14 @@ export function updateAgentControls(state) {
     m.signInHint.hidden = !state?.signIn;
     if (connected && m.signInHint.parentNode !== m.recovery) m.recovery.prepend(m.signInHint);
     else if (!connected && m.signInHint.parentNode !== m.card) m.intro.after(m.signInHint);
-    const own = state?.agents?.find(a => a.id === state.agent), command = own?.signIn, next = connected ? 'reconnect' : `continue with ${name}`;
-    m.signInWords.textContent = command ? `Run this in a terminal, then ${next}:` : `${name} signs in its own way. Follow its instructions, then ${next}.`;
+    const methods = state?.signIn ? state?.authMethods || [] : [];
+    const own = state?.agents?.find(a => a.id === state.agent), command = !methods.length && own?.signIn, next = connected ? 'reconnect' : `continue with ${name}`;
+    m.signInWords.textContent = methods.length ? `${methods.length > 1 ? 'Choose how to sign in. ' : ''}Your browser will open.` : command ? `Run this in a terminal, then ${next}:` : `${name} signs in its own way. Follow its instructions, then ${next}.`;
     m.signInCommand.textContent = command || ''; m.signInRow.hidden = !command;
-    m.signInLink.hidden = !!command || !own?.link; m.signInLink.href = own?.link || '';
+    m.signInLink.hidden = !!command || !!methods.length || !own?.link; m.signInLink.href = own?.link || '';
+    m.help.hidden = !own || own.mark === 'other';   // its words name Claude and Codex
     // In a chat it brings the agent back to the thread; it doesn't resend anything.
     m.retry.textContent = connected ? 'Reconnect' : 'Try again';
-    const methods = state?.signIn ? state?.authMethods || [] : [];
     if (changed(m.login, methods)) {
       m.login.replaceChildren(...methods.map(a => { const b = button(`Sign in with ${a.name}`, () => m.run('authenticate', { methodId: a.id }), 'agent-primary'); b.title = a.description; return b; }));
     }

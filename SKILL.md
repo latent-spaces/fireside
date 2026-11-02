@@ -184,7 +184,7 @@ an error disappear. The running server retains the last valid state until fixed.
 ## Adding an agent
 
 Any program that speaks the Agent Client Protocol can be a chat agent. When the
-user asks for one, point them to **More agents…** in the Chat window (the ACP
+user asks for one, point them to **Add another agent…** in the Chat window (the ACP
 registry, installed for them after they confirm) or **Run a command…**. If they
 want it done for them, check the program is installed and answers over ACP, then
 write `~/.fireside/agents/<id>.json` (`.fireside/agents/` for this project only):

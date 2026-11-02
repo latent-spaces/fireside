@@ -191,7 +191,7 @@ export const binaryCommand = (version, cmd) => `./${path.posix.join(version, cmd
 const description = (entry) => typeof entry.description === 'string' ? entry.description : '';
 const homepage = (entry) => [entry.repository, entry.website].find(https) || null;
 
-/** The registry as the "More agents…" list shows it: only what can run here. */
+/** The registry as the "Add another agent…" list shows it: only what can run here. */
 export async function registry(root) {
   const mine = list(root);
   const packages = new Set(mine.filter((a) => a.layer === 'built-in').map((a) => a.npm));

@@ -67,7 +67,6 @@
 .agent-controls{flex:none;padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px}
 .agent-controls[data-mode=setup]{flex:1;min-height:0;overflow:auto;padding:22px 18px;border:0}
 .agent-login{max-width:330px;margin:0 auto}
-.agent-wordmark{font-family:var(--round);font-size:18px;font-weight:600;color:var(--ink-2);margin-bottom:20px}
 .agent-login h2{font:500 26px/1.15 var(--round);letter-spacing:-.02em;margin:0 0 10px;text-wrap:balance}
 .agent-intro{margin:0 0 22px;color:var(--ink-2);font-size:13px;line-height:1.6}
 .agent-controls button,.agent-controls select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;min-height:36px;padding:7px 10px;max-width:100%}
@@ -109,7 +108,6 @@
 .agent-add .agent-error{max-width:none;margin:10px 0 0}
 .agent-add pre.agent-error{white-space:pre-wrap;font:12px/1.5 var(--mono)}
 .agent-add a{color:inherit;text-underline-offset:3px}
-.agent-reassurance{font-size:12px;line-height:1.6;color:var(--ink-2);margin:17px 0 20px}
 .agent-help,.agent-history,.agent-commands{font-size:12px;line-height:1.5;color:var(--ink-2)}
 .agent-controls summary{cursor:pointer;min-height:30px;padding:5px 0}
 .agent-help{margin-top:16px}

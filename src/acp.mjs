@@ -27,6 +27,14 @@ A sentence you write just before a tool call can reach the user reworded and wit
 const AUTH_REQUIRED = -32000;
 // The adapters ask their CLI who is signed in, and give that up after five seconds.
 const AUTH_STATUS_WAIT = 6000;
+/** End a process and everything it started. */
+async function stop(child) {
+  // One that already exited has no close event left to wait for.
+  if (!child || child.exitCode !== null || child.signalCode !== null) return;
+  const kill = signal => { try { if (process.platform !== 'win32') process.kill(-child.pid, signal); else child.kill(signal); } catch {} };
+  kill('SIGTERM');
+  try { await deadline(new Promise(resolve => child.once('close', resolve)), 2000, 'timeout'); } catch { kill('SIGKILL'); }
+}
 const PRIMER = /\s*<fireside-(context|images)>[\s\S]*?<\/fireside-\1>\s*/g;
 
 // The page gets plain fields to draw, never the agent's raw schema, and what
@@ -133,12 +141,12 @@ export class AcpChat {
       permissions: [...this.permissions].map(([id, p]) => ({ id, ...p.view })),
       questions: [...this.questions].map(([id, q]) => ({ id, ...q.view })) };
   }
-  // Sign-in the agent can do itself when asked: ACP's default method type. A
-  // terminal method needs a capability Fireside doesn't offer, and one carrying
-  // _meta wants client-side setup (an API key field, a gateway) it doesn't do.
+  // Sign-in the agent can do when asked, or as a program of its own (a terminal
+  // method). One carrying _meta wants client-side setup (an API key field, a
+  // gateway) Fireside doesn't do.
   authMethods() {
     if (!this.connection || this.connection.signal.aborted) return [];
-    return (this.info?.authMethods || []).filter(m => (!m.type || m.type === 'agent') && !m._meta && typeof m.id === 'string')
+    return (this.info?.authMethods || []).filter(m => (!m.type || m.type === 'agent' || m.type === 'terminal') && !m._meta && typeof m.id === 'string')
       .map(m => ({ id: m.id, name: String(m.name || m.id), description: m.description || '' }));
   }
   get name() { return agents.get(this.root, this.agent)?.name || this.agent || 'your agent'; }
@@ -335,15 +343,7 @@ export class AcpChat {
       // look like agent bugs, so wait for the tree to be whole instead.
       if (installing()) throw new Error('Fireside is updating its agent. Try again in a moment.');
       const program = agents.launch(spec);
-      const env = { ...process.env, ...spec.env, FIRESIDE_PROJECT: this.root, FIRESIDE_CONNECTION: 'acp',
-        // Lets `fireside stop` tell the desk this chat runs in from any other.
-        FIRESIDE_SERVER_PID: String(process.pid),
-        PATH: path.join(PKG_ROOT, 'bin') + path.delimiter + (process.env.PATH || '') };
-      delete env.CLAUDECODE; delete env.CLAUDE_CODE_SESSION_ID;
-      // Claude Code applies "Chrome on by default" to terminal sessions only, and
-      // an adapter session is not one. Ask for it, unless the user already chose.
-      if (agent === 'claude') env.CLAUDE_CODE_ENABLE_CFC ??= '1';
-      this.child = this.spawnAgent ? this.spawnAgent() : spawn(program.command, program.args, { cwd: this.root, env, stdio: ['pipe', 'pipe', 'pipe'], detached: process.platform !== 'win32' });
+      this.child = this.spawnAgent ? this.spawnAgent() : spawn(program.command, program.args, { cwd: this.root, env: this.agentEnv(spec), stdio: ['pipe', 'pipe', 'pipe'], detached: process.platform !== 'win32' });
       const child = this.child;
       this.diagnostic('agent_started');
       const childAgent = this.agent;
@@ -364,7 +364,7 @@ export class AcpChat {
         this.diagnostic('agent_disconnected');
         this.cancelPermissions(); this.halt('Agent disconnected. Reconnect to continue.');
       });
-      const info = await deadline(this.connection.initialize({ protocolVersion: 1, clientCapabilities: { elicitation: { form: {} } }, clientInfo: { name: 'fireside', version: '0.1.0' } }), 20000, 'Agent startup timed out');
+      const info = await deadline(this.connection.initialize({ protocolVersion: 1, clientCapabilities: { elicitation: { form: {} }, auth: { terminal: true } }, clientInfo: { name: 'fireside', version: '0.1.0' } }), 20000, 'Agent startup timed out');
       if (generation !== this.generation) return;
       this.info = info;
       this.diagnostic('agent_initialized', { agentVersion: info.agentInfo?.version ?? null });
@@ -376,6 +376,17 @@ export class AcpChat {
       if (error.code === AUTH_REQUIRED) return this.needSignIn();
       this.halt(unstarted || error.data?.details || error.message);
     }
+  }
+  agentEnv(spec) {
+    const env = { ...process.env, ...spec.env, FIRESIDE_PROJECT: this.root, FIRESIDE_CONNECTION: 'acp',
+      // Lets `fireside stop` tell the desk this chat runs in from any other.
+      FIRESIDE_SERVER_PID: String(process.pid),
+      PATH: path.join(PKG_ROOT, 'bin') + path.delimiter + (process.env.PATH || '') };
+    delete env.CLAUDECODE; delete env.CLAUDE_CODE_SESSION_ID;
+    // Claude Code applies "Chrome on by default" to terminal sessions only, and
+    // an adapter session is not one. Ask for it, unless the user already chose.
+    if (spec.id === 'claude') env.CLAUDE_CODE_ENABLE_CFC ??= '1';
+    return env;
   }
   async newSession(resume = null) {
     this.checkQueueSession(this.agent, resume);
@@ -422,9 +433,17 @@ export class AcpChat {
     const methods = this.authMethods();
     const method = methods.find(m => m.id === methodId) || (methods.length === 1 && !methodId ? methods[0] : null);
     if (!method || (this.status !== 'error' && !this.signIn)) throw fail('Sign in with the agent CLI, then reconnect');
-    const generation = this.generation;
+    const generation = this.generation, own = this.info.authMethods.find(m => m.id === method.id);
     this.status = 'authenticating'; this.error = null; this.signIn = false; this.changed();
     try {
+      if (own.type === 'terminal') {
+        const finished = await this.login(own);
+        if (generation !== this.generation) return;
+        if (!finished) return this.needSignIn();
+        // An agent that started signed out stays that way, so start it over.
+        this.status = this.sessionId ? 'asleep' : 'error';
+        return await (this.sessionId ? this.wake() : this.connect(this.agent, this.saved()));
+      }
       await deadline(this.connection.authenticate({ methodId: method.id }), 180000, 'Sign-in timed out. Reconnect to try again.');
       this.authStatus = null;
       if (generation === this.generation) await this.newSession(this.info?.agentCapabilities?.loadSession ? this.saved() : null);
@@ -433,6 +452,15 @@ export class AcpChat {
       if (error.code === AUTH_REQUIRED) return this.needSignIn();
       this.halt(error.data?.details || error.message);
     }
+  }
+  // A terminal method: the agent's own login, run as a program. There is no
+  // terminal to give it, so it has to finish in the browser. True if it did.
+  async login(method) {
+    const spec = agents.get(this.root, this.agent), program = agents.launch(spec);
+    const child = this.loginChild = spawn(program.command, [...program.args, ...method.args || []], { cwd: this.root, env: { ...this.agentEnv(spec), ...method.env }, stdio: 'ignore', detached: process.platform !== 'win32' });
+    const exited = new Promise(resolve => { child.once('exit', code => resolve(code === 0)); child.once('error', () => resolve(false)); });
+    try { return await deadline(exited, 180000, 'Sign-in timed out. Reconnect to try again.'); }
+    finally { await stop(child); this.loginChild = null; }
   }
   /** @param {{ prompt: string, id: string, sessionId: string, images?: { data: string, mimeType: string }[] }} message */
   send({ prompt, id, sessionId, images = [] }) {
@@ -728,13 +756,7 @@ export class AcpChat {
   async close() {
     if (this.child) this.diagnostic('agent_close_requested');
     ++this.generation; this.cancelPermissions();
-    const child = this.child;
-    // One that already exited has no close event left to wait for.
-    if (child && child.exitCode === null && child.signalCode === null) {
-      const kill = signal => { try { if (process.platform !== 'win32') process.kill(-child.pid, signal); else child.kill(signal); } catch {} };
-      kill('SIGTERM');
-      try { await deadline(new Promise(resolve => child.once('close', resolve)), 2000, 'timeout'); } catch { kill('SIGKILL'); }
-    }
+    await Promise.all([stop(this.child), stop(this.loginChild)]);
     this.child = null; this.connection = null; this.info = null; this.turn = null;
     this.sessionId = null; this.status = 'disconnected'; this.commands = []; this.configOptions = []; this.error = null; this.signIn = false; this.usage = null;
   }

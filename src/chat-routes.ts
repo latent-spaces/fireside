@@ -13,7 +13,7 @@ const failed = (res: ServerResponse, error: unknown, status: number) => json(res
 export function createChatRoutes({ ROOT, tabs, record, pushAcp, pushState, agentStatus }: RouteContext) {
   let adding = false;
   const routes: Record<string, (input: Awaited<ReturnType<typeof body>>, res: ServerResponse, u: URL) => unknown> = {
-    // The ACP registry, read when the user opens "More agents…" and at no other time.
+    // The ACP registry, read when the user opens "Add another agent…" and at no other time.
     'POST /api/agents/registry': async (input, res) => {
       try { return json(res, { agents: await agents.registry(ROOT) }); }
       catch (error) { return failed(res, error, 502); }

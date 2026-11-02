@@ -129,6 +129,7 @@ export function lightFire({ store, request, machine, onDone }) {
     const agent = chosen || acp.agent;
     const command = acp.agents?.find((a) => a.id === agent)?.signIn;
     const words = !acp.signIn ? `We couldn’t connect to ${nameOf(agent)}.`
+      : methods.length ? `${methods.length > 1 ? 'Choose how to sign in. ' : ''}Your browser will open.`
       : command ? ['Run ', node('code', '', command), ' in a terminal, then try again.']
       : `${nameOf(agent)} signs in its own way. Follow its instructions, then try again.`;
     show('embers', acp.signIn ? `Sign in to ${nameOf(agent)}.` : 'The fire didn’t catch.', words, {
@@ -171,7 +172,7 @@ export function lightFire({ store, request, machine, onDone }) {
   // Agents beyond the list are added in Chat, which knows how.
   function leave() {
     ending = true;
-    open(() => document.querySelector('.win[data-id="chat"] .agent-provider-more')?.click());
+    open(() => document.querySelector('.win[data-id="chat"] .agent-add-more')?.click());
   }
 
   function onKey(event) {
