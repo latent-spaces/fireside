@@ -122,7 +122,7 @@ export function createDesktop({
     // on the left, leaving room beside it rather than stretching across.
     const alone = panels.length === 1 && windowKind(panels[0].kind).aloneWidth;
     if (alone && bounds.w >= alone) {
-      rects[0] = { ...rects[0], w: Math.min(alone, Math.round(bounds.w * .6)), h: Math.min(bounds.h, alone * .75) };
+      rects[0] = { ...rects[0], w: Math.min(alone, Math.round(bounds.w * .6)), h: Math.min(bounds.h, alone * .82) };
     }
     panels.forEach((p, i) => {
       getGeometry()[p.id] = { closed: !!p.collapsed, ...getGeometry()[p.id], ...rects[i] };
