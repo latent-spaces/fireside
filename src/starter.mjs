@@ -7,22 +7,18 @@ import { defaultState, writeState } from './state.mjs';
 
 // Called only when a project has no state.json. Returning users own their desk.
 export function seedDesktop(state, root) {
-  const panels = [
+  state.panels = [
     { id: 'chat', kind: 'chat', title: 'Chat', span: 5, order: 1 },
     { id: 'tokens', kind: 'tokens', title: 'Usage', order: 3, collapsed: true },
-    { id: 'skins', kind: 'skins', title: 'Skins', span: 6, order: 50, collapsed: true },
-    { id: 'solitaire', kind: 'solitaire', title: 'Solitaire', span: 6, order: 70, collapsed: true },
-    { id: 'wiki', kind: 'browser', title: 'Random Wikipedia', span: 6, height: 520, order: 80, collapsed: true, remember: false, url: 'https://en.wikipedia.org/wiki/Special:Random' },
-    { id: 'npr', kind: 'video', title: 'NPR Tiny Desk', span: 7, height: 480, order: 90, collapsed: true, src: 'https://www.youtube.com/playlist?list=PL1B627337ED6F55F0' },
   ];
-  state.panels = panels;
   const art = (file) => 'data:image/svg+xml;base64,' + fs.readFileSync(path.join(PKG_ROOT, 'windows', file)).toString('base64');
+  // These wait behind their icons and join the dock the first time they open.
   state.icons = [
-    { id: 'skins', label: 'Skins', image: art('skins/icon.svg') },
-    { id: 'solitaire', label: 'Solitaire', image: art('solitaire/icon.svg') },
-    { id: 'wiki', label: 'Random Wiki', image: art('browser/random.svg') },
-    { id: 'npr', label: 'NPR', image: art('video/npr.svg') },
-  ].map(icon => ({ ...icon, kind: 'window', panel: icon.id }));
+    { label: 'Skins', image: art('skins/icon.svg'), restore: { id: 'skins', kind: 'skins', title: 'Skins', span: 6, order: 50 } },
+    { label: 'Solitaire', image: art('solitaire/icon.svg'), restore: { id: 'solitaire', kind: 'solitaire', title: 'Solitaire', span: 6, order: 70 } },
+    { label: 'Random Wiki', image: art('browser/random.svg'), restore: { id: 'wiki', kind: 'browser', title: 'Random Wikipedia', span: 6, height: 520, order: 80, remember: false, url: 'https://en.wikipedia.org/wiki/Special:Random' } },
+    { label: 'NPR', image: art('video/npr.svg'), restore: { id: 'npr', kind: 'video', title: 'NPR Tiny Desk', span: 7, height: 480, order: 90, src: 'https://www.youtube.com/playlist?list=PL1B627337ED6F55F0' } },
+  ].map(icon => ({ ...icon, id: icon.restore.id, kind: 'window', panel: icon.restore.id }));
 
   // Never copy a personal launcher path. Only offer apps present on this Mac.
   if (process.platform === 'darwin') {

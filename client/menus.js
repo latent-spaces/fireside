@@ -73,7 +73,8 @@ export function createMenus({ $, el, esc, store, request, composerNote, openWin,
   function openCatalogue() {
     const state = store.state;
     const here = new Map((state?.panels || []).map((panel) => [panel.kind, panel.id]));
-    const iconed = new Set((state?.icons || []).filter((icon) => icon.kind === 'window').map((icon) => icon.panel));
+    const kindOf = new Map((state?.panels || []).map((panel) => [panel.id, panel.kind]));
+    const iconed = new Set((state?.icons || []).filter((icon) => icon.kind === 'window').map((icon) => icon.restore?.kind || kindOf.get(icon.panel)));
     const body = [];
 
     // One grid, no sections: windows that go straight up and windows the agent
@@ -86,7 +87,7 @@ export function createMenus({ $, el, esc, store, request, composerNote, openWin,
     const kinds = [
       // A kind that opens many times (`multiple`, like Browser) is always here: a
       // desktop icon reaching one of them says nothing about wanting another.
-      ...catalogueKinds().filter((spec) => spec.multiple || !iconed.has(here.get(spec.kind))),
+      ...catalogueKinds().filter((spec) => spec.multiple || !iconed.has(spec.kind)),
       ...askableKinds(),
     ].sort(byTitle);
     for (const spec of kinds) {
