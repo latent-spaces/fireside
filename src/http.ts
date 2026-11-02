@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { deskAddress } from './paths.ts';
 
 export const json = (res: ServerResponse, value: unknown, status = 200) => {
   res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
@@ -38,7 +39,7 @@ export async function rawBody(req: IncomingMessage, limit: number) {
 }
 
 export function guard(req: IncomingMessage, url: string, token: string) {
-  const allowed = [new URL(url).host, new URL(url.replace('127.0.0.1', 'localhost')).host];
+  const allowed = [new URL(url).host, new URL(deskAddress(url)).host];
   if (!allowed.includes(req.headers.host || '')) throw Object.assign(new Error('Wrong host'), { status: 403 });
   const origin = req.headers.origin;
   if (origin && !allowed.some((host) => origin === `http://${host}`)) throw Object.assign(new Error('Wrong origin'), { status: 403 });

@@ -12,7 +12,7 @@ import { homedir } from 'node:os';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { PKG_ROOT, SHARED, firesideDir } from './paths.ts';
+import { PKG_ROOT, SHARED, firesideDir, deskAddress } from './paths.ts';
 import { windowFolder, listSkins, bundledURL } from './catalog.ts';
 import { readState, mutate, upsertPanel, savePanelData } from './state.mjs';
 import * as updates from './updates.mjs';
@@ -175,7 +175,7 @@ export function createRoutes(context: RouteContext) {
       if (typeof dir !== 'string' || !dir) return json(res, { error: 'Which desk?' }, 400);
       try {
         const info = await startDesk(dir);
-        return json(res, { ok: true, url: info.url });
+        return json(res, { ok: true, url: deskAddress(info.url) });
       } catch (error) { return json(res, { error: errorInfo(error).message }, 409); }
     },
     'POST /api/desks/forget': async (input, res) => {

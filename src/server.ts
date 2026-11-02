@@ -24,7 +24,7 @@ import { register as registerDesk, unregister as unregisterDesk, list as listDes
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { PKG_ROOT, projectDir, firesideDir, statePath, serverPath, ensureDirs } from './paths.ts';
+import { PKG_ROOT, projectDir, firesideDir, statePath, serverPath, ensureDirs, deskAddress } from './paths.ts';
 import { listWindows } from './catalog.ts';
 import { readState, withData, mutate } from './state.mjs';
 import { serverCodeId, shellCodeId } from './version.ts';
@@ -45,7 +45,7 @@ const TOKEN = randomUUID();
 const clients = new Set<ServerResponse>();
 const activity: Activity[] = [];         // recent tool events, newest last
 const MAX_ACTIVITY = 200;
-const deskList = () => listDesks().map((desk) => ({ ...desk, current: desk.dir === ROOT }));
+const deskList = () => listDesks().map((desk) => ({ ...desk, url: desk.url && deskAddress(desk.url), current: desk.dir === ROOT }));
 const subscriptions = createSubscriptions((view: unknown) => broadcast('subscriptions', view), { wakeProvider: (provider: string) => runProviderWake(ROOT, provider) });
 const CODE_ID = serverCodeId();                        // what `fireside start` checks for staleness
 let SHELL_ID = shellCodeId();                          // a page that loaded other shell code reloads

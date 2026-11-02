@@ -50,6 +50,9 @@ export function ensureDirs(dir: string) {
   return firesideDir(dir);
 }
 
+/** The address people open a desk on. YouTube refuses some embeds on a page at 127.0.0.1. */
+export const deskAddress = (url: string) => url.replace('127.0.0.1', 'localhost');
+
 /** Read the running server's descriptor, or null if nothing is listening. */
 export function readServer(dir: string): ServerDescriptor | null {
   try {

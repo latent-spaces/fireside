@@ -69,7 +69,7 @@ for the desk while they think.
 |---|---|
 | Long-running process | `stream` with its log file as `--source` |
 | Images or short clips, side by side | `gallery` |
-| A video to watch, or a playlist | `video` |
+| A video to watch, or a playlist | `video` with `--src`: a file, a YouTube video, or a YouTube playlist link |
 | Running web app | `iframe` |
 | Multi-step work | `progress` |
 | Result files | `files` |

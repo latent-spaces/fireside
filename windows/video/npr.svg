@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Drawn on the macOS icon grid, so it sits at one size with the app icons in the bar. -->
+  <g transform="translate(12.5 12.5) scale(.8047)">
+  <defs>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></linearGradient>
+    <clipPath id="tile"><rect width="128" height="128" rx="30"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <rect width="128" height="128" fill="#fff"/>
+    <rect x="-1" y="34" width="42" height="60" fill="#D62021"/><rect x="43" y="34" width="42" height="60" fill="#111"/><rect x="87" y="34" width="42" height="60" fill="#237BBD"/>
+    <g fill="#fff" font-family="Helvetica Neue, Arial, sans-serif" font-weight="800" font-size="46" text-anchor="middle"><text x="20" y="77">n</text><text x="64" y="77">p</text><text x="108" y="77">r</text></g>
+  </g>
+  </g>
+</svg>

@@ -55,7 +55,7 @@ export default {
       frame = el('iframe');
       let foreign = false;
       try { foreign = new URL(url).origin !== location.origin; } catch {}
-      frame.setAttribute('sandbox', 'allow-scripts allow-forms' + (foreign ? ' allow-same-origin allow-popups allow-presentation' : '')
+      frame.setAttribute('sandbox', 'allow-scripts allow-forms' + (foreign ? ' allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation' : '')
         + (dialogs ? ' allow-modals' : ''));
       // A frame may write to the clipboard, so a page's own Copy button works. Reading it stays off.
       frame.allow = 'clipboard-write' + (foreign ? '; autoplay; encrypted-media; fullscreen; picture-in-picture' : '');

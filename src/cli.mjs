@@ -9,7 +9,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { projectDir, ensureDirs, readServer, serverPath, panelsDir, firesideDir, SHARED } from './paths.ts';
+import { projectDir, ensureDirs, readServer, serverPath, panelsDir, firesideDir, deskAddress, SHARED } from './paths.ts';
 import { readState, mutate, upsertPanel, savePanelData } from './state.mjs';
 import { listWindows, listSkins, KIND } from './catalog.ts';
 import { stop as stopDesk } from './desks.mjs';
@@ -143,8 +143,8 @@ const COMMANDS = {
       try { s = await launch(ROOT, { port: flags.port }); }
       catch (error) { die(`fireside: server failed to start — ${error.message}`); }
     }
-    if (flags.open !== false && flags.open !== 'false') openBrowser(s.url);
-    console.log(s.url);
+    if (flags.open !== false && flags.open !== 'false') openBrowser(deskAddress(s.url));
+    console.log(deskAddress(s.url));
   },
 
   async stop() {
@@ -165,8 +165,8 @@ const COMMANDS = {
     }, null, 2));
   },
 
-  url() { const s = readServer(ROOT); console.log(s ? s.url : ''); },
-  open() { const s = readServer(ROOT); if (s) openBrowser(s.url); else die('fireside: not running'); },
+  url() { const s = readServer(ROOT); console.log(s ? deskAddress(s.url) : ''); },
+  open() { const s = readServer(ROOT); if (s) openBrowser(deskAddress(s.url)); else die('fireside: not running'); },
   state() { console.log(JSON.stringify(readState(ROOT), null, 2)); },
 
   /** Windows worth offering this user, beside the built-in kinds in the ＋ catalogue.
@@ -349,7 +349,7 @@ const COMMANDS = {
     if (!s) die('fireside: not running');
     if (!readState(ROOT).panels.some((p) => p.id === id)) die(`fireside: no window "${id}" on the desk`);
     const out = path.resolve(ROOT, flags.out || path.join('.fireside', 'shots', `${id}.png`));
-    const result = await shoot({ url: s.url, id, out });
+    const result = await shoot({ url: deskAddress(s.url), id, out });
     console.log(`${result.out} (${result.size})`);
     for (const problem of result.problems) console.log(`  ${problem}`);
   },

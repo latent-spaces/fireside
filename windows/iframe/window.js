@@ -7,7 +7,7 @@ export default {
     // fullscreen; that origin can't reach the desk. A page served by the desk itself stays opaque.
     let foreign = false;
     try { foreign = new URL(p.url, location.href).origin !== location.origin; } catch {}
-    f.setAttribute('sandbox', 'allow-scripts allow-forms' + (foreign ? ' allow-same-origin allow-popups allow-presentation' : ''));
+    f.setAttribute('sandbox', 'allow-scripts allow-forms' + (foreign ? ' allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation' : ''));
     // A frame may write to the clipboard, so a page's own Copy button works. Reading it stays off.
     f.allow = 'clipboard-write' + (foreign ? '; autoplay; encrypted-media; fullscreen; picture-in-picture' : '');
     if (foreign) f.allowFullscreen = true;
